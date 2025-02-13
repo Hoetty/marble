@@ -15,6 +15,15 @@ mod test {
     }
 
     #[test]
+    pub fn convert_f64() {
+        let mut i = 0.0;
+        while i <= 150_000.0 {
+            assert_eq!(i, deserialize::parse_fraction(&serialize::display_fraction(i)).expect(&format!("{i} didnt convert")));
+            i += 1.5;
+        }
+    }
+
+    #[test]
     pub fn all_dont_parse() {
         assert!(deserialize::parse_number("OneOne").is_none());
         assert!(deserialize::parse_number("ElevenOne").is_none());
@@ -22,6 +31,10 @@ mod test {
         assert!(deserialize::parse_number("OneTwenty").is_none());
         assert!(deserialize::parse_number("TenHundred").is_none());
         assert!(deserialize::parse_number("TenThousandFiveMillion").is_none());
+
+        assert!(deserialize::parse_fraction("OnePointOnePointOne").is_none());
+        assert!(deserialize::parse_fraction("OnePointOneTen").is_none());
+        assert!(deserialize::parse_fraction("OnePointOneMillion").is_none());
     }
 
 }
