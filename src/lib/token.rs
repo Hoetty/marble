@@ -9,7 +9,7 @@ pub struct Token {
 pub enum TokenType {
     String, Bool(bool), Number(f64), Nil, Identifier,
 
-    Fn, Do, End, If, Else, Let, Be,
+    Fn, Of, Do, End, If, Else, Let, Be,
 
     Plus, Minus, Times, Over,
     And, Or, Is, Not, Less, Greater,

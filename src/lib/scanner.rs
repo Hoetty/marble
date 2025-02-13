@@ -78,6 +78,7 @@ impl <'a> Scanner<'a> {
     fn check_keyword(word: &str) -> Option<TokenType> {
         match word {
             "fn" => Some(TokenType::Fn),
+            "of" => Some(TokenType::Of),
             "do" => Some(TokenType::Do),
             "end" => Some(TokenType::End),
             "if" => Some(TokenType::If),

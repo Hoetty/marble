@@ -1,5 +1,5 @@
-type Option be Some do Value end 
+type Option be Some of Value
     or None
 
 let Optional be None
-let There be Some Five
+let There be Some of Five

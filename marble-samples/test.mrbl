@@ -5,4 +5,10 @@ let Circumference be fn R do
     Two times R times Pi
 end
 
-let WheelCircumference be Circumference ZeroPointSeven
+let WheelCircumference be Circumference of ZeroPointSeven
+
+let Add be fn A B do 
+    A plus B
+end
+
+let FivePlusTen be Add of Five of Ten

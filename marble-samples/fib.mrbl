@@ -1,0 +1,9 @@
+let Fib be fn N do
+    if N less or One do
+        N
+    end else do
+        Fib of do N minus One end plus Fib of do N minus Two end
+    end
+end
+
+Fib of 20

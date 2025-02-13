@@ -29,8 +29,16 @@
 	],
 	"repository": {
 		"keywords": {
-            "name": "keyword.control.marble",
-            "match": "(\\s|^)(if|else|fn|do|end|let|be|then)(?=\\s|$)"
+            "patterns": [
+                {
+                    "name": "keyword.control.marble",
+                    "match": "(\\s|^)(if|else|do|end|let|be|then)(?=\\s|$)"
+                },
+                {
+                    "name": "keyword.control.less.marble",
+                    "match": "(\\s|^)(fn|of)(?=\\s|$)"
+                }
+            ]
 		},
         "operators": {
             "name": "keyword.operator",
