@@ -3,7 +3,7 @@ use std::{fs::read_to_string, path::PathBuf};
 mod src;
 
 use clap::Parser;
-use marble::{scanner::Scanner, source::Source, token::TokenType};
+use marble::{number::serialize, scanner::Scanner, source::Source, token::TokenType};
 use src::repl::input;
 
 /// Marble interpreter
@@ -27,10 +27,16 @@ pub fn main() {
 
 pub fn repl() {
     for line in input() {
-        let source = Source::new(&line);
-        let mut scanner = Scanner::new(source);
+        // let source = Source::new(&line);
+        // let mut scanner = Scanner::new(source);
     
-        run_scanner(&mut scanner, &source);
+        // run_scanner(&mut scanner, &source);
+
+        if let Ok(num) = line.parse() {
+            println!("{}", serialize::display_number(num));
+        }
+
+        // println!("{:?}", deserialize::parse_fraction(&line));
     }
 }
 

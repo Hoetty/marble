@@ -1,6 +1,6 @@
 use std::{iter::Peekable, str::Chars};
 
-use crate::{source::Source, token::{Token, TokenType}};
+use crate::{number::deserialize, source::Source, token::{Token, TokenType}};
 
 pub struct Scanner<'a> {
     start: usize,
@@ -99,8 +99,8 @@ impl <'a> Scanner<'a> {
         }
     }
 
-    fn check_number(_word: &str) -> Option<f64> {
-        None
+    fn check_number(word: &str) -> Option<f64> {
+        deserialize::parse_fraction(word)
     }
 
     fn create_token(&self, token_type: TokenType) -> Token {
