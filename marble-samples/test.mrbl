@@ -1,0 +1,8 @@
+comment The holy number
+let Pi be ThreePointOneFour
+
+let Circumference be fn R do 
+    Two times R times Pi
+end
+
+let WheelCircumference be Circumference ZeroPointSeven

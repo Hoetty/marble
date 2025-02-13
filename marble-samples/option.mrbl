@@ -1,0 +1,5 @@
+type Option be Some do Value end 
+    or None
+
+let Optional be None
+let There be Some Five

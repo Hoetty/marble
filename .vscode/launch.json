@@ -59,6 +59,16 @@
             },
             "args": [],
             "cwd": "${workspaceFolder}"
+        },
+        {
+            "cwd": "${workspaceFolder}/marble-lsp",
+            "name": "Extension",
+            "type": "extensionHost",
+            "request": "launch",
+            "args": [
+                "--extensionDevelopmentPath=${workspaceFolder}",
+                "${workspaceFolder}/marble-samples"
+            ]
         }
     ]
 }

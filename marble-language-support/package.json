@@ -1,0 +1,25 @@
+{
+    "name": "marble-language-support",
+    "displayName": "Marble Language Support",
+    "description": "Language support for the marble programming language",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.97.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "marble",
+            "aliases": ["Marble", "marble"],
+            "extensions": ["mrbl"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "marble",
+            "scopeName": "source.marble",
+            "path": "./marble.tmLanguage.json"
+        }]
+    }
+}

@@ -1,0 +1,68 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Marble",
+	"patterns": [
+		{
+			"include": "#keywords"
+		},
+		{
+			"include": "#strings"
+		},
+		{
+			"include": "#multi-comments"
+		},
+		{
+			"include": "#comments"
+		},
+        {
+            "include": "#empty-strings"
+        },
+        {
+            "include": "#operators"
+        },
+        {
+            "include": "#bools"
+        },
+        {
+            "include": "#identifiers"
+        }
+	],
+	"repository": {
+		"keywords": {
+            "name": "keyword.control.marble",
+            "match": "(\\s|^)(if|else|fn|do|end|let|be|then)(?=\\s|$)"
+		},
+        "operators": {
+            "name": "keyword.operator",
+            "match": "(\\s|^)(plus|minus|times|over|greater|less|is|or|and|not)(?=\\s|$)"
+        },
+		"strings": {
+			"name": "string.quoted.double.marble",
+			"begin": "(\\s|^)str(?=\\s|$)",
+			"end": "(\\s|^)ing(?=\\s|$)"
+		},
+        "empty-strings": {
+            "name": "string.quoted.double.marble",
+            "match": "(\\s|^)string(?=\\s|$)"
+        },
+        "multi-comments": {
+			"name": "comment.block.marble",
+			"begin": "(\\s|^)com(?=\\s|$)",
+			"end": "(\\s|^)ment(?=\\s|$)"
+		},
+        "comments": {
+			"name": "comment.line.marble",
+			"begin": "(\\s|^)comment(?=\\s|$)",
+			"end": "$"
+        },
+        "bools": {
+            "name": "constant.language.marble",
+            "match": "(\\s|^)(False|True)(?=\\s|$)"
+        },
+        "identifiers": {
+            "name": "entity.name.marble",
+            "match": "(\\s|^)\\S+(?=\\s|$)"
+        }
+	},
+	"scopeName": "source.marble"
+}
