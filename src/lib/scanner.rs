@@ -9,10 +9,18 @@ pub struct Scanner<'a> {
     source: Source<'a>
 }
 
+impl <'a> Iterator for Scanner<'a> {
+    type Item = Token;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        Some(self.next_token())
+    }
+}
+
 impl <'a> Scanner<'a> {
 
     fn skip_whitespace(&mut self) {
-        while !self.is_at_end() && self.is_next_whitespace() && *self.peek() != '\n' {
+        while !self.is_at_end() && self.is_next_whitespace() {
             self.consume();
         }
     }
@@ -21,18 +29,14 @@ impl <'a> Scanner<'a> {
         self.skip_whitespace();
         self.start = self.current;
 
-        if *self.peek() != '\n' {
-            while !self.is_at_end() && !self.is_next_whitespace() {
-                self.consume();
-            }
-        } else {
+        while !self.is_at_end() && !self.is_next_whitespace() {
             self.consume();
         }
 
         &self.source.str[self.start..self.current]
     }
 
-    pub fn next_token(&mut self) -> Token {
+    fn next_token(&mut self) -> Token {
         if self.is_at_end() {
             self.start = self.current;
             return self.create_token(TokenType::Eof);
@@ -42,10 +46,14 @@ impl <'a> Scanner<'a> {
             "\n" => self.create_token(TokenType::Then),
             "string" => self.create_token(TokenType::String),
             "str" => self.string(),
-            "com" => self.multiline_comment(),
-            "comment" => self.comment(),
-            "False" => self.create_token(TokenType::Bool(false)),
-            "True" => self.create_token(TokenType::Bool(true)),
+            "com" => {
+                self.multiline_comment();
+                self.next_token()
+            },
+            "comment" => {
+                self.comment();
+                self.next_token()
+            },
             word => 
                 if let Some(keyword_type) = Self::check_keyword(word) {
                     self.create_token(keyword_type)
@@ -81,20 +89,9 @@ impl <'a> Scanner<'a> {
             "of" => Some(TokenType::Of),
             "do" => Some(TokenType::Do),
             "end" => Some(TokenType::End),
-            "if" => Some(TokenType::If),
-            "else" => Some(TokenType::Else),
             "let" => Some(TokenType::Let),
             "be" => Some(TokenType::Be),
-            "plus" => Some(TokenType::Plus),
-            "minus" => Some(TokenType::Minus),
-            "times" => Some(TokenType::Times),
-            "over" => Some(TokenType::Over),
-            "and" => Some(TokenType::And),
-            "or" => Some(TokenType::Or),
-            "is" => Some(TokenType::Is),
-            "not" => Some(TokenType::Not),
-            "less" => Some(TokenType::Less),
-            "greater" => Some(TokenType::Greater),
+            "in" => Some(TokenType::In),
             "then" => Some(TokenType::Then),
             _ => None,
         }

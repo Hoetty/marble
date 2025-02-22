@@ -1,4 +1,6 @@
-use crate::token::Token;
+use std::collections::HashMap;
+
+use crate::{ast::IdentRef, token::Token};
 
 #[derive(Clone, Copy)]
 pub struct Source<'a> {
@@ -51,5 +53,30 @@ impl <'a> Source<'a> {
         Self {
             str: source
         }
+    }
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct IdentifierTable<'a> {
+    identifiers: HashMap<&'a str, IdentRef>,
+    backwards: Vec<&'a str>,
+}
+
+impl <'a> IdentifierTable<'a> {
+
+    pub fn reference(&mut self, key: &'a str) -> IdentRef {
+        let new_value = self.identifiers.len();
+        *self.identifiers.entry(&key).or_insert_with(|| {
+            self.backwards.push(key);
+            new_value
+        })
+    }
+
+    pub fn name(&self, ident: IdentRef) -> &'a str {
+        self.backwards[ident]
+    }
+
+    pub fn new() -> Self {
+        Self::default()
     }
 }

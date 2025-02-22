@@ -1,5 +1,0 @@
-type Option be Some of Value
-    or None
-
-let Optional be None
-let There be Some of Five

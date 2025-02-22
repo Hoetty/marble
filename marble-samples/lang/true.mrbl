@@ -1,0 +1,5 @@
+fn L do
+    fn R do
+        L
+    end
+end

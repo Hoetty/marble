@@ -7,12 +7,11 @@ pub struct Token {
 
 #[derive(PartialEq, Clone, Copy, Debug)]
 pub enum TokenType {
-    String, Bool(bool), Number(f64), Nil, Identifier,
+    String, Number(f64), Identifier,
 
-    Fn, Of, Do, End, If, Else, Let, Be,
-
-    Plus, Minus, Times, Over,
-    And, Or, Is, Not, Less, Greater,
+    Fn, Of, 
+    Do, End, 
+    Let, Be, In,
 
     Then,
 

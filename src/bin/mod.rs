@@ -1,9 +1,9 @@
-use std::{fs::read_to_string, path::PathBuf};
+use std::{fs::read_to_string, path::PathBuf, process::exit};
 
 mod src;
 
 use clap::Parser;
-use marble::{number::serialize, scanner::Scanner, source::Source, token::TokenType};
+use marble::{compiler::Compiler, interpreter::Interpreter, number::serialize, scanner::Scanner, source::Source, token::TokenType};
 use src::repl::input;
 
 /// Marble interpreter
@@ -43,14 +43,31 @@ pub fn repl() {
 pub fn file(file: &PathBuf) {
     let file = read_to_string(file).unwrap();
     let source = Source::new(&file);
-    let mut scanner = Scanner::new(source);
+    let scanner = Scanner::new(source);
 
-    run_scanner(&mut scanner, &source);
+    let compiler = Compiler::new(&source, scanner);
+    let result = compiler.compile();
+
+    match result {
+        Ok((ast, table)) => {
+            let mut interpreter = Interpreter::new(ast, &source, table);
+
+            println!("{}", interpreter.interpret())
+        },
+        Err((token, error)) => {
+            let line = source.line_start(&token);
+            let column = source.column_start(&token);
+            let lexeme = source.lexeme(&token);
+
+            println!("Error at '{lexeme}' {line}:{column} -> {error}");
+            exit(1);
+        },
+    }
 }
 
 fn run_scanner(scanner: &mut Scanner, source: &Source) {
     loop {
-        let token = scanner.next_token();
+        let token = scanner.next().unwrap();
         println!("{:?}: {:?}", token, source.lexeme(&token));
     
         if token.token_type == TokenType::Eof {

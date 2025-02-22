@@ -1,6 +1,14 @@
+use environment::Value;
+
 pub mod scanner;
 pub mod source;
 pub mod token;
+pub mod compiler;
+pub mod ast;
+pub mod error;
+pub mod interpreter;
+pub mod environment;
+pub mod builtin;
 
 /// A crate to handle numbers and their written forms
 ///  

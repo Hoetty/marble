@@ -18,12 +18,6 @@
             "include": "#empty-strings"
         },
         {
-            "include": "#operators"
-        },
-        {
-            "include": "#bools"
-        },
-        {
             "include": "#identifiers"
         }
 	],
@@ -32,18 +26,10 @@
             "patterns": [
                 {
                     "name": "keyword.control.marble",
-                    "match": "(\\s|^)(if|else|do|end|let|be|then)(?=\\s|$)"
-                },
-                {
-                    "name": "keyword.control.less.marble",
-                    "match": "(\\s|^)(fn|of)(?=\\s|$)"
+                    "match": "(\\s|^)(fn|of|do|end|let|be|in|then)(?=\\s|$)"
                 }
             ]
 		},
-        "operators": {
-            "name": "keyword.operator",
-            "match": "(\\s|^)(plus|minus|times|over|greater|less|is|or|and|not)(?=\\s|$)"
-        },
 		"strings": {
 			"name": "string.quoted.double.marble",
 			"begin": "(\\s|^)str(?=\\s|$)",
@@ -62,10 +48,6 @@
 			"name": "comment.line.marble",
 			"begin": "(\\s|^)comment(?=\\s|$)",
 			"end": "$"
-        },
-        "bools": {
-            "name": "constant.language.marble",
-            "match": "(\\s|^)(False|True)(?=\\s|$)"
         },
         "identifiers": {
             "name": "entity.name.marble",
