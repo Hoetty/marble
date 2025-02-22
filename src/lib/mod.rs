@@ -1,10 +1,8 @@
-use environment::Value;
-
 pub mod scanner;
 pub mod source;
 pub mod token;
 pub mod compiler;
-pub mod ast;
+pub mod expr;
 pub mod error;
 pub mod interpreter;
 pub mod environment;

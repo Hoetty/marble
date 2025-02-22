@@ -49,8 +49,8 @@ pub fn file(file: &PathBuf) {
     let result = compiler.compile();
 
     match result {
-        Ok((ast, table)) => {
-            let mut interpreter = Interpreter::new(ast, &source, table);
+        Ok((expr, table)) => {
+            let mut interpreter = Interpreter::new(expr, &source, table);
 
             println!("{}", interpreter.interpret())
         },
@@ -65,13 +65,13 @@ pub fn file(file: &PathBuf) {
     }
 }
 
-fn run_scanner(scanner: &mut Scanner, source: &Source) {
-    loop {
-        let token = scanner.next().unwrap();
-        println!("{:?}: {:?}", token, source.lexeme(&token));
+// fn run_scanner(scanner: &mut Scanner, source: &Source) {
+//     loop {
+//         let token = scanner.next().unwrap();
+//         println!("{:?}: {:?}", token, source.lexeme(&token));
     
-        if token.token_type == TokenType::Eof {
-            break;
-        }
-    }
-}
+//         if token.token_type == TokenType::Eof {
+//             break;
+//         }
+//     }
+// }

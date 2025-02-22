@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{ast::IdentRef, token::Token};
+use crate::{expr::IdentRef, token::Token};
 
 #[derive(Clone, Copy)]
 pub struct Source<'a> {

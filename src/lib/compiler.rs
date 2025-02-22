@@ -1,14 +1,13 @@
 use std::iter::Peekable;
 
-use crate::{ast::{Ast, Expr}, error::Error, scanner::Scanner, source::{IdentifierTable, Source}, token::{Token, TokenType}};
+use crate::{error::Error, expr::{Expr, ExprRef, IdentRef}, scanner::Scanner, source::{IdentifierTable, Source}, token::{Token, TokenType}};
 
-type ExprResult = Result<usize, Error>;
-type IdentResult = Result<usize, Error>;
+type ExprResult = Result<ExprRef, Error>;
+type IdentResult = Result<IdentRef, Error>;
 
 pub struct Compiler<'a> {
     source: &'a Source<'a>,
     scanner: Peekable<Scanner<'a>>,
-    ast: Ast,
     identifiers: IdentifierTable<'a>
 }
 
@@ -18,17 +17,16 @@ impl <'a> Compiler<'a> {
         Self {
             source,
             scanner: scanner.peekable(),
-            ast: Ast::new(),
             identifiers: IdentifierTable::new()
         }
     }
 
-    pub fn compile(mut self) -> Result<(Ast, IdentifierTable<'a>), (Token, Error)> {
-        self.expression().map_err(|e| (self.consume(), e))?;
+    pub fn compile(mut self) -> Result<(ExprRef, IdentifierTable<'a>), (Token, Error)> {
+        let expr = self.expression().map_err(|e| (self.consume(), e))?;
 
         self.match_consume(TokenType::Eof, Error::ExpectedEofAfterExpression).map_err(|e| (self.consume(), e))?;
 
-        Ok((self.ast, self.identifiers))
+        Ok((expr, self.identifiers))
     }
 
     fn expression(&mut self) -> ExprResult {
@@ -49,9 +47,9 @@ impl <'a> Compiler<'a> {
 
         let body = self.then_expression()?;
 
-        let function = self.ast.push_expr(Expr::Fn(ident, body));
+        let function = ExprRef::new(Expr::Fn(ident, body));
         
-        Ok(self.ast.push_expr(Expr::Call(function, value)))
+        Ok(ExprRef::new(Expr::Call(function, value)))
     }
 
     fn then_expression(&mut self) -> ExprResult {
@@ -59,7 +57,7 @@ impl <'a> Compiler<'a> {
 
         while self.matches(TokenType::Then) {
             let rhs = self.let_expression()?;
-            lhs = self.ast.push_expr(Expr::Then(lhs, rhs));
+            lhs = ExprRef::new(Expr::Then(lhs, rhs));
         }
 
         Ok(lhs)
@@ -70,7 +68,7 @@ impl <'a> Compiler<'a> {
 
         while self.matches(TokenType::Of) {
             let rhs = self.value()?;
-            lhs = self.ast.push_expr(Expr::Call(lhs, rhs));
+            lhs = ExprRef::new(Expr::Call(lhs, rhs));
         }
 
         Ok(lhs)
@@ -89,17 +87,17 @@ impl <'a> Compiler<'a> {
                     _ => Ok(self.string_of(&lexeme[4..lexeme.len() - 4])),
                 }
             },
-            TokenType::Number(num) => Ok(self.ast.push_expr(Expr::Number(num))),
+            TokenType::Number(num) => Ok(ExprRef::new(Expr::Number(num))),
             TokenType::Identifier => {
                 let ident = self.identifiers.reference(&self.source.lexeme(&token));
-                Ok(self.ast.push_expr(Expr::Identifier(ident)))
+                Ok(ExprRef::new(Expr::Identifier(ident)))
             },
             _ => Err(Error::ExpectedExpressionFound(token))
         }
     }
 
-    fn string_of(&mut self, string: &str) -> usize {
-        self.ast.push_expr(Expr::String(string.to_string()))
+    fn string_of(&mut self, string: &str) -> ExprRef {
+        ExprRef::new(Expr::String(string.to_string()))
     }
 
     fn block(&mut self) -> ExprResult {
@@ -115,7 +113,7 @@ impl <'a> Compiler<'a> {
 
         let body = self.block()?;
 
-        Ok(self.ast.push_expr(Expr::Fn(ident, body)))
+        Ok(ExprRef::new(Expr::Fn(ident, body)))
     }
 
     fn try_identifier(&mut self) -> IdentResult {

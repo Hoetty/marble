@@ -1,6 +1,6 @@
 use std::{fmt::Display, rc::Rc};
 
-use crate::ast::{ExprRef, IdentRef};
+use crate::expr::{ExprRef, IdentRef};
 
 pub type EnvRef = Rc<Environment>;
 
@@ -54,7 +54,7 @@ impl  Environment {
     }
 }
 
-impl  Display for Value {
+impl Display for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Value::Number(n) => f.write_fmt(format_args!("{n}")),

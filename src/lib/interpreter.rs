@@ -1,10 +1,10 @@
 use std::rc::Rc;
 
-use crate::{ast::{Ast, Expr, ExprRef, IdentRef}, builtin, environment::{EnvRef, Environment, Value}, source::{IdentifierTable, Source}};
+use crate::{expr::{Expr, ExprRef, IdentRef}, builtin, environment::{EnvRef, Environment, Value}, source::{IdentifierTable, Source}};
 
 pub struct Interpreter<'a> {
     environment: EnvRef,
-    ast: Ast,
+    expr: ExprRef,
     source: &'a Source<'a>,
     identifiers: IdentifierTable<'a>
 }
@@ -15,35 +15,41 @@ impl <'a> Interpreter<'a> {
         let mut environment = Environment::root();
 
         environment = Environment::extend(environment, identifiers.reference("Print"), Value::Builtin(Rc::new(builtin::print)));
+        environment = Environment::extend(environment, identifiers.reference("True"), builtin::get_true(identifiers));
+        environment = Environment::extend(environment, identifiers.reference("False"), builtin::get_false(identifiers));
+        environment = Environment::extend(environment, identifiers.reference("And"), builtin::get_and(identifiers));
+        environment = Environment::extend(environment, identifiers.reference("Or"), builtin::get_or(identifiers));
+        environment = Environment::extend(environment, identifiers.reference("Not"), builtin::get_not(identifiers));
+        environment = Environment::extend(environment, identifiers.reference("If"), builtin::get_if(identifiers));
 
         environment
     }
 
     pub fn interpret(&mut self) -> Value {
-        self.evaluate(self.ast.exprs.len() - 1)
+        self.evaluate(Rc::clone(&self.expr))
     }
 
     fn evaluate(&mut self, expr: ExprRef) -> Value {
-        match *self.ast.expr(expr) {
+        match expr.as_ref() {
             Expr::Then(left, right) => {
-                let left = self.evaluate(left);
+                let left = self.evaluate(ExprRef::clone(left));
 
                 self.try_call(left, Value::Unit);
 
-                self.evaluate(right)
+                self.evaluate(ExprRef::clone(right))
             },
-            Expr::Identifier(ident) => match self.environment.find(ident) {
+            Expr::Identifier(ident) => match self.environment.find(*ident) {
                 Some(value) => value,
-                None => panic!("{} is not defined", self.identifiers.name(ident)),
+                None => panic!("{} is not defined", self.identifiers.name(*ident)),
             },
             Expr::Call(lhs, rhs) => {
-                let lhs = self.evaluate(lhs);
-                let rhs = self.evaluate(rhs);
+                let lhs = self.evaluate(ExprRef::clone(lhs));
+                let rhs = self.evaluate(ExprRef::clone(rhs));
                 self.try_call(lhs, rhs).expect("Can't call non fn lhs in of expression")
             },
             Expr::String(ref s) => Value::String(s.clone()),
-            Expr::Number(n) => Value::Number(n),
-            Expr::Fn(argument, body) => Value::Fn(argument, body, Rc::clone(&self.environment)),
+            Expr::Number(n) => Value::Number(*n),
+            Expr::Fn(argument, body) => Value::Fn(*argument, ExprRef::clone(body), Rc::clone(&self.environment)),
         }
     }
 
@@ -64,13 +70,12 @@ impl <'a> Interpreter<'a> {
         return_value
     }
 
-    pub fn new(ast: Ast, source: &'a Source<'a>, mut identifiers: IdentifierTable<'a>) -> Self {
+    pub fn new(expr: ExprRef, source: &'a Source<'a>, mut identifiers: IdentifierTable<'a>) -> Self {
         Self { 
             environment: Self::default_environment(&mut identifiers), 
-            ast, 
+            expr, 
             source,
             identifiers
         }
     }
-
 }
