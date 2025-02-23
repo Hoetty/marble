@@ -54,6 +54,7 @@ impl <'a> Scanner<'a> {
                 self.comment();
                 self.next_token()
             },
+            "" => self.create_token(TokenType::Eof),
             word => 
                 if let Some(keyword_type) = Self::check_keyword(word) {
                     self.create_token(keyword_type)

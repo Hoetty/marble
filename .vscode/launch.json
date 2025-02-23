@@ -44,6 +44,26 @@
         {
             "type": "lldb",
             "request": "launch",
+            "name": "Debug executable 'imarble file'",
+            "cargo": {
+                "args": [
+                    "build",
+                    "--bin=imarble",
+                    "--package=marble"
+                ],
+                "filter": {
+                    "name": "imarble",
+                    "kind": "bin"
+                }
+            },
+            "args": [
+                "marble-samples/test.mrbl"
+            ],
+            "cwd": "${workspaceFolder}"
+        },
+        {
+            "type": "lldb",
+            "request": "launch",
             "name": "Debug unit tests in executable 'imarble'",
             "cargo": {
                 "args": [

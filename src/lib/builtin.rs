@@ -1,127 +1,104 @@
 use std::rc::Rc;
 
-use crate::{environment::{EnvRef, Environment}, expr::{Expr, ExprRef}, interpreter::ValueResult, source::IdentifierTable, value::Value};
-
-pub fn print(value: Value, _: EnvRef) -> ValueResult {
-    Ok(Value::Builtin(Rc::new(move |_, _| {
-        println!("{value}");
-        Ok(Value::Unit)
-    })))
-}
+use crate::{environment::Environment, expr::{Expr, ExprRef}, interpreter::ValueResult, source::IdentifierTable, value::Value};
 
 macro_rules! builtin_binary {
     ($lhs: ident, $rhs: ident, $env: ident, $result: expr) => {
-        Value::Builtin(Rc::new(move |$lhs, _| {
+        ExprRef::new(Expr::Value(Box::new(Value::Builtin(Rc::new(move |$lhs, _| {
             Ok(Value::Builtin(Rc::new(move |$rhs, $env| {
                 $result
             })))
-        }))
+        })))))
     };
 }
 
-pub fn get_is(identifiers: &mut IdentifierTable) -> Value {
-    let true_ref = identifiers.reference("True");
-    let false_ref = identifiers.reference("False");
-
-    builtin_binary!(lhs, rhs, env, Ok(if lhs == rhs { 
-        env.find(true_ref).expect("True must be defined") 
-    } else { 
-        env.find(false_ref).expect("False must be defined") 
+pub fn get_print() -> ExprRef {
+    builtin_binary!(lhs, _rhs, _env, Ok({
+        println!("{lhs}");
+        Value::Unit
     }))
 }
 
-pub fn get_true(identifiers: &mut IdentifierTable) -> Value {
-    Value::Fn(
-        identifiers.reference("L"), 
-        ExprRef::new(Expr::Fn(
-            identifiers.reference("R"), 
-            ExprRef::new(Expr::Identifier(identifiers.reference("L")))
-        )), 
-        Environment::root()
-    )
+pub fn get_is() -> ExprRef {
+    builtin_binary!(lhs, rhs, env, Ok(if lhs == rhs { 
+        env.from_bottom(0)
+    } else { 
+        env.from_bottom(1)
+    }))
 }
 
-pub fn get_false(identifiers: &mut IdentifierTable) -> Value {
-    Value::Fn(
-        identifiers.reference("L"),
+pub fn get_true() -> ExprRef {
+    ExprRef::new(Expr::Fn(
         ExprRef::new(Expr::Fn(
-            identifiers.reference("R"),
-            ExprRef::new(Expr::Identifier(identifiers.reference("R")))
-        )),
-        Environment::root()
-    )
+            ExprRef::new(Expr::Identifier(1))
+        ))
+    ))
 }
 
-pub fn get_not(identifiers: &mut IdentifierTable) -> Value {
-    Value::Fn(
-        identifiers.reference("Predicate"),
+pub fn get_false() -> ExprRef {
+    ExprRef::new(Expr::Fn(
         ExprRef::new(Expr::Fn(
-            identifiers.reference("L"),
+            ExprRef::new(Expr::Identifier(0))
+        ))
+    ))
+}
+
+pub fn get_not() -> ExprRef {
+    ExprRef::new(Expr::Fn(
+        ExprRef::new(Expr::Fn(
             ExprRef::new(Expr::Fn(
-                identifiers.reference("R"),
                 ExprRef::new(Expr::Call(
                     ExprRef::new(Expr::Call(
-                        ExprRef::new(Expr::Identifier(identifiers.reference("Predicate"))),
-                        ExprRef::new(Expr::Identifier(identifiers.reference("R")))
+                        ExprRef::new(Expr::Identifier(2)),
+                        ExprRef::new(Expr::Identifier(0))
                     )),
-                    ExprRef::new(Expr::Identifier(identifiers.reference("L")))
+                    ExprRef::new(Expr::Identifier(1))
                 ))
             ))
         )),
-        Environment::root()
-    )
+    ))
 }
 
-pub fn get_if(identifiers: &mut IdentifierTable) -> Value {
-    Value::Fn(
-        identifiers.reference("Predicate"),
+pub fn get_if() -> ExprRef {
+    ExprRef::new(Expr::Fn(
         ExprRef::new(Expr::Fn(
-            identifiers.reference("L"),
             ExprRef::new(Expr::Fn(
-                identifiers.reference("R"),
                 ExprRef::new(Expr::Call(
                     ExprRef::new(Expr::Call(
-                        ExprRef::new(Expr::Identifier(identifiers.reference("Predicate"))),
-                        ExprRef::new(Expr::Identifier(identifiers.reference("L")))
+                        ExprRef::new(Expr::Identifier(2)),
+                        ExprRef::new(Expr::Identifier(1))
                     )),
-                    ExprRef::new(Expr::Identifier(identifiers.reference("R")))
+                    ExprRef::new(Expr::Identifier(0))
                 ))
             ))
         )),
-        Environment::root()
-    )
+    ))
 }
 
-pub fn get_or(identifiers: &mut IdentifierTable) -> Value {
-    Value::Fn(
-        identifiers.reference("L"),
+pub fn get_or() -> ExprRef {
+    ExprRef::new(Expr::Fn(
         ExprRef::new(Expr::Fn(
-            identifiers.reference("R"),
             ExprRef::new(Expr::Call(
                 ExprRef::new(Expr::Call(
-                    ExprRef::new(Expr::Identifier(identifiers.reference("L"))),
-                    ExprRef::new(Expr::Identifier(identifiers.reference("L")))
+                    ExprRef::new(Expr::Identifier(1)),
+                    ExprRef::new(Expr::Identifier(1))
                 )),
-                ExprRef::new(Expr::Identifier(identifiers.reference("R")))
+                ExprRef::new(Expr::Identifier(0))
             ))
         )),
-        Environment::root()
-    )
+    ))
 }
 
-pub fn get_and(identifiers: &mut IdentifierTable) -> Value {
-    Value::Fn(
-        identifiers.reference("L"),
+pub fn get_and() -> ExprRef {
+    ExprRef::new(Expr::Fn(
         ExprRef::new(Expr::Fn(
-            identifiers.reference("R"),
             ExprRef::new(Expr::Call(
                 ExprRef::new(Expr::Call(
-                    ExprRef::new(Expr::Identifier(identifiers.reference("L"))),
-                    ExprRef::new(Expr::Identifier(identifiers.reference("R")))
+                    ExprRef::new(Expr::Identifier(1)),
+                    ExprRef::new(Expr::Identifier(0))
                 )),
-                ExprRef::new(Expr::Identifier(identifiers.reference("L")))
+                ExprRef::new(Expr::Identifier(1))
             ))
         )),
-        Environment::root()
-    )
+    ))
 }

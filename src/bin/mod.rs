@@ -45,7 +45,8 @@ pub fn file(file: &PathBuf) {
     let source = Source::new(&file);
     let scanner = Scanner::new(source);
 
-    let compiler = Compiler::new(&source, scanner);
+    let mut compiler = Compiler::new(&source, scanner);
+    compiler.with_bindings(Compiler::default_bindings());
     let result = compiler.compile();
 
     match result {

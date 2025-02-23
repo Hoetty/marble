@@ -1,4 +1,6 @@
-let IsZero be Is of Zero in
-Print of do IsZero of Zero of One of Zero end then
-Print of do IsZero of One of One of Zero end then
-Unit
+let N be Five in
+Print of N then Unit
+
+fn N do
+    Print of N then Unit
+end of Five 

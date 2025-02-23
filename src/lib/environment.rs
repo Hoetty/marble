@@ -1,26 +1,35 @@
-use std::{fmt::Display, rc::Rc};
+use std::rc::Rc;
 
-use crate::{expr::{ExprRef, IdentRef}, interpreter::ValueResult, value::Value};
+use crate::value::Value;
 
 pub type EnvRef = Rc<Environment>;
 
-pub enum Environment {
+#[derive(Clone)]
+pub enum Environment where {
     Value {
-        ident: IdentRef,
+        depth: usize,
         value: Value,
         parent: EnvRef,
     },
     Root
 }
 
-impl  Environment {
-    pub fn extend(environment: EnvRef, ident: IdentRef, value: Value) -> EnvRef {
-        Rc::new(Environment::Value { ident, value, parent: Rc::clone(&environment) })
+impl  Environment where {
+
+    pub fn extend(environment: EnvRef, value: Value) -> EnvRef {
+        Rc::new(Environment::Value { value, parent: Rc::clone(&environment), depth: environment.next_depth() })
+    }
+
+    pub fn next_depth(&self) -> usize {
+        match self {
+            Environment::Value { depth, value: _, parent: _ } => depth + 1,
+            Environment::Root => 0,
+        }
     }
 
     pub fn pop(environment: &EnvRef) -> EnvRef {
         match Rc::as_ref(environment) {
-            Environment::Value { ident: _, value: _, parent } => Rc::clone(parent),
+            Environment::Value { depth: _, value: _, parent } => Rc::clone(parent),
             Environment::Root => panic!("Popped the root Environment"),
         }
     }
@@ -33,14 +42,25 @@ impl  Environment {
         Rc::new(Environment::Root)
     }
 
-    pub fn find(&self, ident: IdentRef) -> Option<Value> {
+    pub fn distance_from_top(&self, depth: usize) -> usize {
         match self {
-            Environment::Value { ident: other, value, parent } => if ident == *other {
-                Some(value.clone())
+            Environment::Value { depth: other, value: _, parent: _ } => other - depth,
+            Environment::Root => depth + 1,
+        }
+    }
+
+    pub fn from_bottom(&self, depth: usize) -> Value {
+        self.from_top(self.distance_from_top(depth))
+    }
+
+    pub fn from_top(&self, depth: usize) -> Value {
+        match self {
+            Self::Root => panic!("Tried to get on environment root"),
+            Self::Value { depth: _, value, parent } => if depth == 0 {
+                value.clone()
             } else {
-                parent.find(ident)
-            },
-            Environment::Root => None,
+                parent.from_top(depth - 1)
+            }
         }
     }
 }

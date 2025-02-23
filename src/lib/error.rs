@@ -13,6 +13,7 @@ pub enum Error {
     ExpectedDoAsFunctionBody,
     ValueNotCallable(Value),
     IdentifierIsNotDefined(String),
+    IdentifierIsAlreadyDefined(String),
 }
 
 impl Display for Error {
@@ -27,6 +28,7 @@ impl Display for Error {
             Self::ExpectedDoAsFunctionBody => f.write_str("Expected do to start function body"),
             Self::ValueNotCallable(value) => f.write_fmt(format_args!("Value {value} is not callable")),
             Self::IdentifierIsNotDefined(ident) => f.write_fmt(format_args!("Identifier {ident} is not defined")),
+            Self::IdentifierIsAlreadyDefined(ident) => f.write_fmt(format_args!("Identifier {ident} is already defined")),
         }
     }
 }

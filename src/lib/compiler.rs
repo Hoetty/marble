@@ -1,28 +1,61 @@
-use std::iter::Peekable;
+use std::{iter::Peekable, rc::Rc};
 
-use crate::{error::Error, expr::{Expr, ExprRef, IdentRef}, scanner::Scanner, source::{IdentifierTable, Source}, token::{Token, TokenType}};
+use crate::{builtin, error::Error, expr::{Expr, ExprRef, IdentRef}, scanner::Scanner, source::{IdentifierTable, Source}, token::{Token, TokenType}, value::Value};
 
 type ExprResult = Result<ExprRef, Error>;
 type IdentResult = Result<IdentRef, Error>;
 
+type Binding<'a> = (&'a str, fn () -> ExprRef);
+
 pub struct Compiler<'a> {
     source: &'a Source<'a>,
     scanner: Peekable<Scanner<'a>>,
-    identifiers: IdentifierTable<'a>
+    identifiers: IdentifierTable<'a>,
+    extra_bindings: Vec<Binding<'a>>
 }
 
 impl <'a> Compiler<'a> {
+
+    pub fn default_bindings() -> Vec<Binding<'static>> {
+        vec![
+            ("True", builtin::get_true), // 0
+            ("False", builtin::get_false), // 1
+            ("And", builtin::get_and),
+            ("Or", builtin::get_or),
+            ("Not", builtin::get_not),
+            ("If", builtin::get_if),
+            ("Unit", || ExprRef::new(Expr::Value(Box::new(Value::Unit)))),
+            ("Print", builtin::get_print),
+            ("Is", builtin::get_is),
+        ]
+    }
 
     pub fn new(source: &'a Source<'a>, scanner: Scanner<'a>) -> Compiler<'a> {
         Self {
             source,
             scanner: scanner.peekable(),
-            identifiers: IdentifierTable::new()
+            identifiers: IdentifierTable::new(),
+            extra_bindings: Vec::new()
         }
     }
 
+    pub fn with_bindings(&mut self, bindings: Vec<Binding<'a>>) -> &Self {
+        self.extra_bindings.extend(bindings);
+
+        self
+    }
+
     pub fn compile(mut self) -> Result<(ExprRef, IdentifierTable<'a>), (Token, Error)> {
-        let expr = self.expression().map_err(|e| (self.consume(), e))?;
+        for (ident, _) in &self.extra_bindings {
+            self.identifiers.push(&ident).map_err(|e| (Token { end: 0, start: 0, token_type: TokenType::Eof }, e))?;
+        }
+
+        let mut expr = self.expression().map_err(|e| (self.consume(), e))?;
+
+        for (_, provider) in self.extra_bindings.iter().rev() {
+            let function = ExprRef::new(Expr::Fn(expr));
+            expr = ExprRef::new(Expr::Call(function, provider()))
+        }
 
         self.match_consume(TokenType::Eof, Error::ExpectedEofAfterExpression).map_err(|e| (self.consume(), e))?;
 
@@ -34,20 +67,29 @@ impl <'a> Compiler<'a> {
     }
 
     fn let_expression(&mut self) -> ExprResult {
-        if !self.matches(TokenType::Let) {
+        if !self.matches(TokenType::Let).is_some() {
             return self.call();
         }
 
-        let ident = self.try_identifier()?;
+        // The identifier is first parsed, but then popped of again so it isnt available in the initializer
+        let idx = self.try_identifier()?;
+        let lexeme = self.identifiers.name(idx);
+        self.identifiers.pop();
+
         self.match_consume(TokenType::Be, Error::ExpectedBeInAssignment)?;
 
         let value = self.then_expression()?;
 
         self.match_consume(TokenType::In, Error::ExpectedInAfterAssignment)?;
 
+        // After the initiliazer is finished, the identifier is pushed again
+        self.identifiers.push(lexeme)?;
+
         let body = self.then_expression()?;
 
-        let function = ExprRef::new(Expr::Fn(ident, body));
+        self.identifiers.pop();
+
+        let function = ExprRef::new(Expr::Fn(body));
         
         Ok(ExprRef::new(Expr::Call(function, value)))
     }
@@ -55,7 +97,7 @@ impl <'a> Compiler<'a> {
     fn then_expression(&mut self) -> ExprResult {
         let mut lhs = self.let_expression()?;
 
-        while self.matches(TokenType::Then) {
+        while self.matches(TokenType::Then).is_some() {
             let rhs = self.let_expression()?;
             lhs = ExprRef::new(Expr::Then(lhs, rhs));
         }
@@ -66,7 +108,7 @@ impl <'a> Compiler<'a> {
     fn call(&mut self) -> ExprResult {
         let mut lhs = self.value()?;
 
-        while self.matches(TokenType::Of) {
+        while self.matches(TokenType::Of).is_some() {
             let rhs = self.value()?;
             lhs = ExprRef::new(Expr::Call(lhs, rhs));
         }
@@ -89,8 +131,9 @@ impl <'a> Compiler<'a> {
             },
             TokenType::Number(num) => Ok(ExprRef::new(Expr::Number(num))),
             TokenType::Identifier => {
-                let ident = self.identifiers.reference(&self.source.lexeme(&token));
-                Ok(ExprRef::new(Expr::Identifier(ident)))
+                self.identifiers.distance_from_top(&self.source.lexeme(&token)).map(|ident| {
+                    ExprRef::new(Expr::Identifier(ident))
+                })
             },
             _ => Err(Error::ExpectedExpressionFound(token))
         }
@@ -107,22 +150,23 @@ impl <'a> Compiler<'a> {
     }
 
     fn function(&mut self) -> ExprResult {
-        let ident = self.try_identifier()?;
+        self.try_identifier()?;
 
         self.match_consume(TokenType::Do, Error::ExpectedDoAsFunctionBody)?;
 
         let body = self.block()?;
 
-        Ok(ExprRef::new(Expr::Fn(ident, body)))
+        self.identifiers.pop();
+
+        Ok(ExprRef::new(Expr::Fn(body)))
     }
 
     fn try_identifier(&mut self) -> IdentResult {
-        if self.peek().token_type == TokenType::Identifier {
-            let identifier = self.consume();
-            Ok(self.identifiers.reference(&self.source.lexeme(&identifier)))
-        } else {
-            Err(Error::ExpectedIdentifier)
-        }
+        let identifier = self.match_consume(TokenType::Identifier, Error::ExpectedIdentifier)?;
+
+        let lexeme = &self.source.lexeme(&identifier);
+
+        self.identifiers.push(&lexeme)
     }
 
     fn peek(&mut self) -> &Token {
@@ -133,20 +177,15 @@ impl <'a> Compiler<'a> {
         self.scanner.next().unwrap()
     }
 
-    fn matches(&mut self, token: TokenType) -> bool {
+    fn matches(&mut self, token: TokenType) -> Option<Token> {
         if self.peek().token_type == token {
-            self.consume();
-            return true;
+            Some(self.consume())    
+        } else {
+            None
         }
-
-        false
     }
 
-    fn match_consume(&mut self, token: TokenType, error: Error) -> Result<(), Error> {
-        if self.matches(token) {
-            Ok(())
-        } else {
-            Err(error)
-        }
+    fn match_consume(&mut self, token: TokenType, error: Error) -> Result<Token, Error> {
+        self.matches(token).ok_or(error)
     }
 }

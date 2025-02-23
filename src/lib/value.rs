@@ -1,13 +1,13 @@
 use std::{fmt::Display, rc::Rc};
 
-use crate::{environment::EnvRef, expr::{ExprRef, IdentRef}, interpreter::ValueResult};
+use crate::{environment::EnvRef, expr::ExprRef, interpreter::ValueResult};
 
 #[derive(Clone)]
 pub enum Value {
     Number(f64),
-    String(String),
+    String(Rc<String>),
     Unit,
-    Fn(IdentRef, ExprRef, EnvRef),
+    Fn(ExprRef, EnvRef),
     Builtin(Rc<dyn Fn(Value, EnvRef) -> ValueResult>)
 }
 
@@ -17,7 +17,7 @@ impl Display for Value {
             Value::Number(n) => f.write_fmt(format_args!("{n}")),
             Value::String(s) => f.write_fmt(format_args!("{s}")),
             Value::Unit => f.write_str("Unit"),
-            Value::Fn(_, _, _) => f.write_str("Function"),
+            Value::Fn(_, _) => f.write_str("Function"),
             Value::Builtin(_) => f.write_str("Builtin Function"),
         }
     }
