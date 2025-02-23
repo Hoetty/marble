@@ -1,6 +1,8 @@
 use std::rc::Rc;
 
-use crate::{expr::{Expr, ExprRef, IdentRef}, builtin, environment::{EnvRef, Environment, Value}, source::{IdentifierTable, Source}};
+use crate::{builtin, environment::{EnvRef, Environment, Value}, error::Error, expr::{Expr, ExprRef, IdentRef}, source::{IdentifierTable, Source}};
+
+pub type ValueResult = Result<Value, Error>;
 
 pub struct Interpreter<'a> {
     environment: EnvRef,
@@ -21,47 +23,48 @@ impl <'a> Interpreter<'a> {
         environment = Environment::extend(environment, identifiers.reference("Or"), builtin::get_or(identifiers));
         environment = Environment::extend(environment, identifiers.reference("Not"), builtin::get_not(identifiers));
         environment = Environment::extend(environment, identifiers.reference("If"), builtin::get_if(identifiers));
+        environment = Environment::extend(environment, identifiers.reference("Unit"), Value::Unit);
 
         environment
     }
 
-    pub fn interpret(&mut self) -> Value {
+    pub fn interpret(&mut self) -> ValueResult {
         self.evaluate(Rc::clone(&self.expr))
     }
 
-    fn evaluate(&mut self, expr: ExprRef) -> Value {
+    fn evaluate(&mut self, expr: ExprRef) -> ValueResult {
         match expr.as_ref() {
             Expr::Then(left, right) => {
-                let left = self.evaluate(ExprRef::clone(left));
+                let left = self.evaluate(ExprRef::clone(left))?;
 
-                self.try_call(left, Value::Unit);
+                self.call(left, Value::Unit)?;
 
                 self.evaluate(ExprRef::clone(right))
             },
             Expr::Identifier(ident) => match self.environment.find(*ident) {
-                Some(value) => value,
-                None => panic!("{} is not defined", self.identifiers.name(*ident)),
+                Some(value) => Ok(value),
+                None => Err(Error::IdentifierIsNotDefined(self.identifiers.name(*ident).to_string())),
             },
             Expr::Call(lhs, rhs) => {
-                let lhs = self.evaluate(ExprRef::clone(lhs));
-                let rhs = self.evaluate(ExprRef::clone(rhs));
-                self.try_call(lhs, rhs).expect("Can't call non fn lhs in of expression")
+                let lhs = self.evaluate(ExprRef::clone(lhs))?;
+                let rhs = self.evaluate(ExprRef::clone(rhs))?;
+                self.call(lhs, rhs)
             },
-            Expr::String(ref s) => Value::String(s.clone()),
-            Expr::Number(n) => Value::Number(*n),
-            Expr::Fn(argument, body) => Value::Fn(*argument, ExprRef::clone(body), Rc::clone(&self.environment)),
+            Expr::String(ref s) => Ok(Value::String(s.clone())),
+            Expr::Number(n) => Ok(Value::Number(*n)),
+            Expr::Fn(argument, body) => Ok(Value::Fn(*argument, ExprRef::clone(body), Rc::clone(&self.environment))),
         }
     }
 
-    fn try_call(&mut self, lhs: Value, rhs: Value) -> Option<Value> {
+    fn call(&mut self, lhs: Value, rhs: Value) -> ValueResult {
         match lhs {
-            Value::Fn(ident, expr, env) => Some(self.evaluate_fn(ident, expr, env, rhs)),
-            Value::Builtin(function) => Some(function(rhs)),
-            _ => { None }
+            Value::Fn(ident, expr, env) => self.evaluate_fn(ident, expr, env, rhs),
+            Value::Builtin(function) => function(rhs),
+            _ => { Err(Error::ValueNotCallable(lhs)) }
         }
     }
 
-    fn evaluate_fn(&mut self, ident: IdentRef, expr: ExprRef, environment: EnvRef, value: Value) -> Value {
+    fn evaluate_fn(&mut self, ident: IdentRef, expr: ExprRef, environment: EnvRef, value: Value) -> ValueResult {
         let previous = Rc::clone(&self.environment);
         self.environment = Environment::extend(environment, ident, value);
         let return_value = self.evaluate(expr);

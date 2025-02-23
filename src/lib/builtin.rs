@@ -1,12 +1,12 @@
 use std::rc::Rc;
 
-use crate::{environment::{Environment, Value}, expr::{Expr, ExprRef}, source::IdentifierTable};
+use crate::{environment::{Environment, Value}, expr::{Expr, ExprRef}, interpreter::ValueResult, source::IdentifierTable};
 
-pub fn print(value: Value) -> Value {
-    Value::Builtin(Rc::new(move |_| {
+pub fn print(value: Value) -> ValueResult {
+    Ok(Value::Builtin(Rc::new(move |_| {
         println!("{value}");
-        Value::Unit
-    }))
+        Ok(Value::Unit)
+    })))
 }
 
 pub fn get_true(identifiers: &mut IdentifierTable) -> Value {

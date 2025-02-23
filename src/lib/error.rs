@@ -1,8 +1,8 @@
 use std::fmt::Display;
 
-use crate::token::Token;
+use crate::{environment::Value, token::Token};
 
-#[derive(Clone, Debug)]
+#[derive(Clone)]
 pub enum Error {
     ExpectedIdentifier,
     ExpectedBeInAssignment,
@@ -10,7 +10,9 @@ pub enum Error {
     ExpectedEofAfterExpression,
     ExpectedExpressionFound(Token),
     ExpectedEndAfterDoBlock,
-    ExpectedDoAsFunctionBody
+    ExpectedDoAsFunctionBody,
+    ValueNotCallable(Value),
+    IdentifierIsNotDefined(String),
 }
 
 impl Display for Error {
@@ -23,6 +25,8 @@ impl Display for Error {
             Self::ExpectedExpressionFound(token) => f.write_fmt(format_args!("Expected expression, found {:?}", token)),
             Self::ExpectedEndAfterDoBlock => f.write_str("Expected 'end' after do block"),
             Self::ExpectedDoAsFunctionBody => f.write_str("Expected do to start function body"),
+            Self::ValueNotCallable(value) => f.write_fmt(format_args!("Value {value} is not callable")),
+            Self::IdentifierIsNotDefined(ident) => f.write_fmt(format_args!("Identifier {ident} is not defined")),
         }
     }
 }

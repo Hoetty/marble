@@ -52,7 +52,10 @@ pub fn file(file: &PathBuf) {
         Ok((expr, table)) => {
             let mut interpreter = Interpreter::new(expr, &source, table);
 
-            println!("{}", interpreter.interpret())
+            match interpreter.interpret() {
+                Ok(value) => println!("{value}"),
+                Err(e) => println!("Error -> {e}"),
+            }
         },
         Err((token, error)) => {
             let line = source.line_start(&token);

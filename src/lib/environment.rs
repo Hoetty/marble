@@ -1,6 +1,6 @@
 use std::{fmt::Display, rc::Rc};
 
-use crate::expr::{ExprRef, IdentRef};
+use crate::{expr::{ExprRef, IdentRef}, interpreter::ValueResult};
 
 pub type EnvRef = Rc<Environment>;
 
@@ -19,7 +19,7 @@ pub enum Value {
     String(String),
     Unit,
     Fn(IdentRef, ExprRef, EnvRef),
-    Builtin(Rc<dyn Fn(Value) -> Value>)
+    Builtin(Rc<dyn Fn(Value) -> ValueResult>)
 }
 
 impl  Environment {
