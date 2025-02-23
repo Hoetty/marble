@@ -9,17 +9,24 @@ pub fn print(value: Value, _: EnvRef) -> ValueResult {
     })))
 }
 
+macro_rules! builtin_binary {
+    ($lhs: ident, $rhs: ident, $env: ident, $result: expr) => {
+        Value::Builtin(Rc::new(move |$lhs, _| {
+            Ok(Value::Builtin(Rc::new(move |$rhs, $env| {
+                $result
+            })))
+        }))
+    };
+}
+
 pub fn get_is(identifiers: &mut IdentifierTable) -> Value {
     let true_ref = identifiers.reference("True");
     let false_ref = identifiers.reference("False");
-    Value::Builtin(Rc::new(move |lhs, _| {
-        Ok(Value::Builtin(Rc::new(move |rhs, env| {
-            Ok(if lhs == rhs { 
-                env.find(true_ref).expect("True must be defined") 
-            } else { 
-                env.find(false_ref).expect("False must be defined") 
-            })
-        })))
+
+    builtin_binary!(lhs, rhs, env, Ok(if lhs == rhs { 
+        env.find(true_ref).expect("True must be defined") 
+    } else { 
+        env.find(false_ref).expect("False must be defined") 
     }))
 }
 
