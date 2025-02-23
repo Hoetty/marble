@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::{builtin, environment::{EnvRef, Environment, Value}, error::Error, expr::{Expr, ExprRef, IdentRef}, source::{IdentifierTable, Source}};
+use crate::{builtin, environment::{EnvRef, Environment}, error::Error, expr::{Expr, ExprRef, IdentRef}, source::{IdentifierTable, Source}, value::Value};
 
 pub type ValueResult = Result<Value, Error>;
 
@@ -24,6 +24,7 @@ impl <'a> Interpreter<'a> {
         environment = Environment::extend(environment, identifiers.reference("Not"), builtin::get_not(identifiers));
         environment = Environment::extend(environment, identifiers.reference("If"), builtin::get_if(identifiers));
         environment = Environment::extend(environment, identifiers.reference("Unit"), Value::Unit);
+        environment = Environment::extend(environment, identifiers.reference("Is"), builtin::get_is(identifiers));
 
         environment
     }
@@ -52,14 +53,14 @@ impl <'a> Interpreter<'a> {
             },
             Expr::String(ref s) => Ok(Value::String(s.clone())),
             Expr::Number(n) => Ok(Value::Number(*n)),
-            Expr::Fn(argument, body) => Ok(Value::Fn(*argument, ExprRef::clone(body), Rc::clone(&self.environment))),
+            Expr::Fn(argument, body) => Ok(Value::Fn(*argument, ExprRef::clone(body), EnvRef::clone(&self.environment))),
         }
     }
 
     fn call(&mut self, lhs: Value, rhs: Value) -> ValueResult {
         match lhs {
             Value::Fn(ident, expr, env) => self.evaluate_fn(ident, expr, env, rhs),
-            Value::Builtin(function) => function(rhs),
+            Value::Builtin(function) => function(rhs, EnvRef::clone(&self.environment)),
             _ => { Err(Error::ValueNotCallable(lhs)) }
         }
     }

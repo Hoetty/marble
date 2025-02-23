@@ -6,6 +6,7 @@ pub mod expr;
 pub mod error;
 pub mod interpreter;
 pub mod environment;
+pub mod value;
 pub mod builtin;
 
 /// A crate to handle numbers and their written forms

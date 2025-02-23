@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::{environment::Value, token::Token};
+use crate::{token::Token, value::Value};
 
 #[derive(Clone)]
 pub enum Error {

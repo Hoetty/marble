@@ -1,12 +1,26 @@
 use std::rc::Rc;
 
-use crate::{environment::{Environment, Value}, expr::{Expr, ExprRef}, interpreter::ValueResult, source::IdentifierTable};
+use crate::{environment::{EnvRef, Environment}, expr::{Expr, ExprRef}, interpreter::ValueResult, source::IdentifierTable, value::Value};
 
-pub fn print(value: Value) -> ValueResult {
-    Ok(Value::Builtin(Rc::new(move |_| {
+pub fn print(value: Value, _: EnvRef) -> ValueResult {
+    Ok(Value::Builtin(Rc::new(move |_, _| {
         println!("{value}");
         Ok(Value::Unit)
     })))
+}
+
+pub fn get_is(identifiers: &mut IdentifierTable) -> Value {
+    let true_ref = identifiers.reference("True");
+    let false_ref = identifiers.reference("False");
+    Value::Builtin(Rc::new(move |lhs, _| {
+        Ok(Value::Builtin(Rc::new(move |rhs, env| {
+            Ok(if lhs == rhs { 
+                env.find(true_ref).expect("True must be defined") 
+            } else { 
+                env.find(false_ref).expect("False must be defined") 
+            })
+        })))
+    }))
 }
 
 pub fn get_true(identifiers: &mut IdentifierTable) -> Value {
