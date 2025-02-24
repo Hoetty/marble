@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::{environment::Environment, expr::{Expr, ExprRef}, interpreter::ValueResult, source::IdentifierTable, value::Value};
+use crate::{expr::{Expr, ExprRef}, value::Value};
 
 macro_rules! builtin_binary {
     ($lhs: ident, $rhs: ident, $env: ident, $result: expr) => {
@@ -25,6 +25,42 @@ pub fn get_is() -> ExprRef {
     } else { 
         env.from_bottom(1)
     }))
+}
+
+pub fn get_is_not() -> ExprRef {
+    builtin_binary!(lhs, rhs, env, Ok(if lhs == rhs { 
+        env.from_bottom(1)
+    } else { 
+        env.from_bottom(0)
+    }))
+}
+
+macro_rules! builtin_number_binary {
+    ($lhs: ident, $rhs: ident, $env: ident, $name: literal, $result: expr) => {{
+        ExprRef::new(Expr::Value(Box::new(Value::Builtin(Rc::new(move |$lhs, _| {
+            let $lhs = $lhs.number_for_operator($name)?;
+            Ok(Value::Builtin(Rc::new(move |$rhs, $env| {
+                let $rhs = $rhs.number_for_operator($name)?;
+                $result
+            })))
+        })))))
+    }};
+}
+
+pub fn get_add() -> ExprRef {
+    builtin_number_binary!(lhs, rhs, _env, "Add", Ok(Value::Number(lhs + rhs)))
+}
+
+pub fn get_sub() -> ExprRef {
+    builtin_number_binary!(lhs, rhs, _env, "Sub", Ok(Value::Number(lhs - rhs)))
+}
+
+pub fn get_mul() -> ExprRef {
+    builtin_number_binary!(lhs, rhs, _env, "Mul", Ok(Value::Number(lhs * rhs)))
+}
+
+pub fn get_div() -> ExprRef {
+    builtin_number_binary!(lhs, rhs, _env, "Div", Ok(Value::Number(lhs / rhs)))
 }
 
 pub fn get_true() -> ExprRef {

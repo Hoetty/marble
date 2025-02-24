@@ -1,4 +1,4 @@
-use std::{iter::Peekable, rc::Rc};
+use std::iter::Peekable;
 
 use crate::{builtin, error::Error, expr::{Expr, ExprRef, IdentRef}, scanner::Scanner, source::{IdentifierTable, Source}, token::{Token, TokenType}, value::Value};
 
@@ -27,6 +27,11 @@ impl <'a> Compiler<'a> {
             ("Unit", || ExprRef::new(Expr::Value(Box::new(Value::Unit)))),
             ("Print", builtin::get_print),
             ("Is", builtin::get_is),
+            ("IsNot", builtin::get_is_not),
+            ("Add", builtin::get_add),
+            ("Sub", builtin::get_sub),
+            ("Mul", builtin::get_mul),
+            ("Div", builtin::get_div),
         ]
     }
 
@@ -72,9 +77,7 @@ impl <'a> Compiler<'a> {
         }
 
         // The identifier is first parsed, but then popped of again so it isnt available in the initializer
-        let idx = self.try_identifier()?;
-        let lexeme = self.identifiers.name(idx);
-        self.identifiers.pop();
+        let variable_name = self.try_identifier()?;
 
         self.match_consume(TokenType::Be, Error::ExpectedBeInAssignment)?;
 
@@ -83,7 +86,7 @@ impl <'a> Compiler<'a> {
         self.match_consume(TokenType::In, Error::ExpectedInAfterAssignment)?;
 
         // After the initiliazer is finished, the identifier is pushed again
-        self.identifiers.push(lexeme)?;
+        self.identifiers.push(variable_name)?;
 
         let body = self.then_expression()?;
 
@@ -150,7 +153,8 @@ impl <'a> Compiler<'a> {
     }
 
     fn function(&mut self) -> ExprResult {
-        self.try_identifier()?;
+        let argument = self.try_identifier()?;
+        self.identifiers.push(argument);
 
         self.match_consume(TokenType::Do, Error::ExpectedDoAsFunctionBody)?;
 
@@ -161,12 +165,10 @@ impl <'a> Compiler<'a> {
         Ok(ExprRef::new(Expr::Fn(body)))
     }
 
-    fn try_identifier(&mut self) -> IdentResult {
+    fn try_identifier(&mut self) -> Result<&'a str, Error> {
         let identifier = self.match_consume(TokenType::Identifier, Error::ExpectedIdentifier)?;
 
-        let lexeme = &self.source.lexeme(&identifier);
-
-        self.identifiers.push(&lexeme)
+        Ok(self.source.lexeme(&identifier))
     }
 
     fn peek(&mut self) -> &Token {

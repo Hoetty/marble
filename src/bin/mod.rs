@@ -3,7 +3,7 @@ use std::{fs::read_to_string, path::PathBuf, process::exit};
 mod src;
 
 use clap::Parser;
-use marble::{compiler::Compiler, interpreter::Interpreter, number::serialize, scanner::Scanner, source::Source, token::TokenType};
+use marble::{compiler::Compiler, interpreter::Interpreter, number::serialize, scanner::Scanner, source::Source};
 use src::repl::input;
 
 /// Marble interpreter

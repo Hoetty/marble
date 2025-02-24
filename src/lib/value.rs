@@ -1,6 +1,6 @@
 use std::{fmt::Display, rc::Rc};
 
-use crate::{environment::EnvRef, expr::ExprRef, interpreter::ValueResult};
+use crate::{environment::EnvRef, error::Error, expr::ExprRef, interpreter::ValueResult};
 
 #[derive(Clone)]
 pub enum Value {
@@ -9,6 +9,17 @@ pub enum Value {
     Unit,
     Fn(ExprRef, EnvRef),
     Builtin(Rc<dyn Fn(Value, EnvRef) -> ValueResult>)
+}
+
+impl Value {
+
+    pub fn number_for_operator(&self, operator: &'static str) -> Result<f64, Error> {
+        match self {
+            Value::Number(f) => Ok(*f),
+            _ => Err(Error::ArgumentToOperatorMustBeANumber(operator))
+        }
+    }
+
 }
 
 impl Display for Value {

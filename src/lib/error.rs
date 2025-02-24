@@ -14,6 +14,7 @@ pub enum Error {
     ValueNotCallable(Value),
     IdentifierIsNotDefined(String),
     IdentifierIsAlreadyDefined(String),
+    ArgumentToOperatorMustBeANumber(&'static str),
 }
 
 impl Display for Error {
@@ -29,6 +30,7 @@ impl Display for Error {
             Self::ValueNotCallable(value) => f.write_fmt(format_args!("Value {value} is not callable")),
             Self::IdentifierIsNotDefined(ident) => f.write_fmt(format_args!("Identifier {ident} is not defined")),
             Self::IdentifierIsAlreadyDefined(ident) => f.write_fmt(format_args!("Identifier {ident} is already defined")),
+            Self::ArgumentToOperatorMustBeANumber(str) => f.write_fmt(format_args!("Argument to {str} must be a number!")),
         }
     }
 }
