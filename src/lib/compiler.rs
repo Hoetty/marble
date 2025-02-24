@@ -76,7 +76,6 @@ impl <'a> Compiler<'a> {
             return self.call();
         }
 
-        // The identifier is first parsed, but then popped of again so it isnt available in the initializer
         let variable_name = self.try_identifier()?;
 
         self.match_consume(TokenType::Be, Error::ExpectedBeInAssignment)?;
@@ -85,7 +84,7 @@ impl <'a> Compiler<'a> {
 
         self.match_consume(TokenType::In, Error::ExpectedInAfterAssignment)?;
 
-        // After the initiliazer is finished, the identifier is pushed again
+        // After the initiliazer is finished, the identifier is pushed, so that it isnt available in the initializer
         self.identifiers.push(variable_name)?;
 
         let body = self.then_expression()?;
@@ -154,7 +153,7 @@ impl <'a> Compiler<'a> {
 
     fn function(&mut self) -> ExprResult {
         let argument = self.try_identifier()?;
-        self.identifiers.push(argument);
+        self.identifiers.push(argument)?;
 
         self.match_consume(TokenType::Do, Error::ExpectedDoAsFunctionBody)?;
 
