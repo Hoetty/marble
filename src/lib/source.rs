@@ -58,8 +58,7 @@ impl <'a> Source<'a> {
 
 #[derive(Clone, Debug, Default)]
 pub struct IdentifierTable<'a> {
-    identifiers: HashMap<&'a str, IdentRef>,
-    backwards: Vec<&'a str>,
+    identifiers: Vec<&'a str>
 }
 
 type IdentifierResult = Result<usize, Error>;
@@ -67,35 +66,29 @@ type IdentifierResult = Result<usize, Error>;
 impl <'a> IdentifierTable<'a> {
 
     pub fn push(&mut self, key: &'a str) -> IdentifierResult {
-        if self.is_defined(key) {
-            Err(Error::IdentifierIsAlreadyDefined(key.to_string()))
-        } else {
-            let depth = self.identifiers.len();
-            self.identifiers.insert(key, depth);
-            self.backwards.push(key);
-            Ok(depth)
-        }
+        let depth = self.identifiers.len();
+        self.identifiers.push(key);
+        Ok(depth)
     }
 
     pub fn distance_from_root(&self, key: &'a str) -> IdentifierResult {
-        self.identifiers.get(&key).copied().ok_or_else(|| Error::IdentifierIsNotDefined(key.to_string()))
+        self.identifiers.iter()
+            .rev()
+            .position(|ident| *ident == key)
+            .ok_or_else(|| Error::IdentifierIsNotDefined(key.to_string()))
+            .map(|idx| self.identifiers.len() - 1 - idx)
     }
 
     pub fn distance_from_top(&self, key: &'a str) -> IdentifierResult {
-        self.distance_from_root(key).map(|distance| self.backwards.len() - 1 - distance)
+        self.distance_from_root(key).map(|distance| self.identifiers.len() - 1 - distance)
     }
 
     pub fn pop(&mut self) {
-        let key = self.backwards.pop().expect("Popped entire name table");
-        self.identifiers.remove(&key);
+        self.identifiers.pop().expect("Popped entire name table");
     }
 
     pub fn name(&self, ident: IdentRef) -> &'a str {
-        self.backwards[ident]
-    }
-
-    pub fn is_defined(&self, key: &'a str) -> bool {
-        self.identifiers.contains_key(key)
+        self.identifiers[ident]
     }
 
     pub fn new() -> Self {

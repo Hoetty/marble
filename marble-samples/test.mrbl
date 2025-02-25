@@ -1,20 +1,6 @@
-let Y be fn F do
-    let G be fn X do 
-        F of do X of X end 
-    end in
-    G of G
-end in
-
-let FactR be fn Fact do
-    fn N do 
-        Is of N of Zero of do
-            One
-        end of do
-            Mul of N of do Fact of do Sub of N of One end end
-        end
-    end
-end in
-
-let Fact be Y of FactR in
-
-Fact of Five
+do let N be Five in
+PrintLn of N then
+let N be Six in
+PrintLn of N end then
+let N be Seven in
+PrintLn of N then Five
