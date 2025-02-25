@@ -84,6 +84,8 @@ impl <'a> Interpreter<'a> {
                 }
             };
 
+            // Save the value for later, so it isnt computed again
+            *possible.try_borrow_mut().map_err(|_| Error::ValueDependsOnItself)? = Some(ValueRef::clone(&result));
             value = result;
         }
 
