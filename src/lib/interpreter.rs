@@ -1,17 +1,15 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::{environment::{EnvRef, Environment}, error::Error, expr::{Expr, ExprRef}, source::{IdentifierTable, Source}, value::{Value, ValueRef}};
+use crate::{environment::{EnvRef, Environment}, error::Error, expr::{Expr, ExprRef}, value::{Value, ValueRef}};
 
 pub type ValueResult = Result<ValueRef, Error>;
 
-pub struct Interpreter<'a> {
+pub struct Interpreter {
     environment: EnvRef,
     expr: ExprRef,
-    source: &'a Source<'a>,
-    identifiers: IdentifierTable<'a>
 }
 
-impl <'a> Interpreter<'a> {
+impl Interpreter {
 
     pub fn interpret(&mut self) -> ValueResult {
         let value = self.evaluate(Rc::clone(&self.expr))?;
@@ -92,12 +90,10 @@ impl <'a> Interpreter<'a> {
         Ok(value)
     }
 
-    pub fn new(expr: ExprRef, source: &'a Source<'a>, identifiers: IdentifierTable<'a>) -> Self {
+    pub fn new(expr: ExprRef) -> Self {
         Self { 
             environment: Environment::root(), 
-            expr, 
-            source,
-            identifiers
+            expr
         }
     }
 }

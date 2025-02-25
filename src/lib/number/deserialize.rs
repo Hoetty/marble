@@ -6,10 +6,16 @@ fn peek_next_part(word: &str) -> &str {
         return word;
     }
 
-    word[1..].find(|c: char| c.is_ascii_uppercase()).map_or_else(
+    let start = first_char_length(word);
+
+    word[start..].find(|c: char| c.is_ascii_uppercase()).map_or_else(
         || (word),
-        |u| &word[..u + 1]
+        |u| &word[.. start + u]
     )
+}
+
+fn first_char_length(word: &str) -> usize {
+    word.chars().next().unwrap().len_utf8()
 }
 
 /// Consumes the next part and returns a peek and the rest of the word
@@ -28,7 +34,7 @@ fn split_next_part(word: &str) -> (&str, &str) {
         return (word, word);
     }
 
-    word[1..].find(|c: char| c.is_ascii_uppercase()).map_or_else(
+    word[first_char_length(word)..].find(|c: char| c.is_ascii_uppercase()).map_or_else(
         || (word, &word[0..0]),
         |u| word.split_at(u + 1)
     )

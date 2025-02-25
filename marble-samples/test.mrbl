@@ -1,6 +1,4 @@
-do let N be Five in
-PrintLn of N then
-let N be Six in
-PrintLn of N end then
-let N be Seven in
-PrintLn of N then Five
+let 5 be Five in 
+let + be Add in
+PrintLn of do + of 5 of 5 end then
+Unit

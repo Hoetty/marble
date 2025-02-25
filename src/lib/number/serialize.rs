@@ -26,7 +26,7 @@ fn append_triplet_to_name(word: &mut String, mut triplet: u64) {
         append_triplet_to_name(word, triplet / 100);
         word.push_str("Hundred");
 
-        triplet = triplet % 100;
+        triplet %= 100;
 
         // If the remaining two digits aren't zero, they are further processed
         // We stop at zero, because OneHundredZero isn't a nice number
@@ -105,8 +105,8 @@ pub fn display_number(mut number: u64) -> String {
         }
 
         // Remove the triplet and go to the next factor
-        number = number % factor;
-        factor = factor / 1000;
+        number %= factor;
+        factor /= 1000;
     }
 
     word

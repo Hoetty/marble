@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use crate::{error::Error, expr::IdentRef, token::Token};
 
 #[derive(Clone, Copy)]
@@ -46,6 +44,11 @@ impl <'a> Source<'a> {
     #[inline]
     pub fn len(&self) -> usize {
         self.str.len()
+    }
+
+    #[inline]
+    pub fn is_empty(&self) -> bool {
+        self.str.is_empty()
     }
 
     #[inline]

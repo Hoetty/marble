@@ -50,8 +50,8 @@ pub fn file(file: &PathBuf) {
     let result = compiler.compile();
 
     match result {
-        Ok((expr, table)) => {
-            let mut interpreter = Interpreter::new(expr, &source, table);
+        Ok((expr, _)) => {
+            let mut interpreter = Interpreter::new(expr);
 
             match interpreter.interpret() {
                 Ok(value) => println!("{value}"),

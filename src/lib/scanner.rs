@@ -9,7 +9,7 @@ pub struct Scanner<'a> {
     source: Source<'a>
 }
 
-impl <'a> Iterator for Scanner<'a> {
+impl Iterator for Scanner<'_> {
     type Item = Token;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -43,10 +43,11 @@ impl <'a> Scanner<'a> {
         }
 
         match self.next_word() {
-            "\n" => self.create_token(TokenType::Then),
+            "" => self.create_token(TokenType::Eof),
             "string" => self.create_token(TokenType::String),
             "str" => self.string(),
             "com" => {
+                // The comment is consumed but not returned
                 self.multiline_comment();
                 self.next_token()
             },
@@ -54,7 +55,6 @@ impl <'a> Scanner<'a> {
                 self.comment();
                 self.next_token()
             },
-            "" => self.create_token(TokenType::Eof),
             word => 
                 if let Some(keyword_type) = Self::check_keyword(word) {
                     self.create_token(keyword_type)
@@ -115,7 +115,7 @@ impl <'a> Scanner<'a> {
     }
 
     fn is_next_whitespace(&mut self) -> bool {
-        self.peek().is_whitespace()
+        self.peek().is_ascii_whitespace()
     }
 
     fn consume_until(&mut self, target: &str) {
@@ -127,7 +127,7 @@ impl <'a> Scanner<'a> {
 
             let test = &self.source.str[self.current - 1 - target.len()..self.current];
 
-            if (test.as_bytes()[0] as char).is_whitespace() && &test[1..] == target {
+            if (test.as_bytes()[0] as char).is_ascii_whitespace() && &test[1..] == target {
                 return;
             } else {
                 self.consume();

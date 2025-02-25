@@ -1,9 +1,8 @@
 use std::iter::Peekable;
 
-use crate::{builtin, error::Error, expr::{Expr, ExprRef, IdentRef}, scanner::Scanner, source::{IdentifierTable, Source}, token::{Token, TokenType}, value::{Value, ValueRef}};
+use crate::{builtin, error::Error, expr::{Expr, ExprRef}, scanner::Scanner, source::{IdentifierTable, Source}, token::{Token, TokenType}, value::{Value, ValueRef}};
 
 type ExprResult = Result<ExprRef, Error>;
-type IdentResult = Result<IdentRef, Error>;
 
 type Binding<'a> = (&'a str, fn () -> ExprRef);
 
@@ -53,7 +52,7 @@ impl <'a> Compiler<'a> {
 
     pub fn compile(mut self) -> Result<(ExprRef, IdentifierTable<'a>), (Token, Error)> {
         for (ident, _) in &self.extra_bindings {
-            self.identifiers.push(&ident).map_err(|e| (Token { end: 0, start: 0, token_type: TokenType::Eof }, e))?;
+            self.identifiers.push(ident).map_err(|e| (Token { end: 0, start: 0, token_type: TokenType::Eof }, e))?;
         }
 
         let mut expr = self.expression().map_err(|e| (self.consume(), e))?;
@@ -73,7 +72,7 @@ impl <'a> Compiler<'a> {
     }
 
     fn let_expression(&mut self) -> ExprResult {
-        if !self.matches(TokenType::Let).is_some() {
+        if self.matches(TokenType::Let).is_none() {
             return self.call();
         }
 
@@ -134,7 +133,7 @@ impl <'a> Compiler<'a> {
             },
             TokenType::Number(num) => Ok(ExprRef::new(Expr::Number(num))),
             TokenType::Identifier => {
-                self.identifiers.distance_from_top(&self.source.lexeme(&token)).map(|ident| {
+                self.identifiers.distance_from_top(self.source.lexeme(&token)).map(|ident| {
                     ExprRef::new(Expr::Identifier(ident))
                 })
             },
