@@ -1,0 +1,6 @@
+fn F do
+    let G be fn X do
+        F of do fn V do X of X of V end end
+    end in
+    G of G
+end

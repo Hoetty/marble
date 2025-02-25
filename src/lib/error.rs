@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use crate::{token::Token, value::Value};
+use crate::{token::Token, value::ValueRef};
 
 #[derive(Clone)]
 pub enum Error {
@@ -11,7 +11,7 @@ pub enum Error {
     ExpectedExpressionFound(Token),
     ExpectedEndAfterDoBlock,
     ExpectedDoAsFunctionBody,
-    ValueNotCallable(Value),
+    ValueNotCallable(ValueRef),
     IdentifierIsNotDefined(String),
     IdentifierIsAlreadyDefined(String),
     ArgumentToOperatorMustBeANumber(&'static str),
@@ -27,7 +27,7 @@ impl Display for Error {
             Self::ExpectedExpressionFound(token) => f.write_fmt(format_args!("Expected expression, found {:?}", token)),
             Self::ExpectedEndAfterDoBlock => f.write_str("Expected 'end' after do block"),
             Self::ExpectedDoAsFunctionBody => f.write_str("Expected do to start function body"),
-            Self::ValueNotCallable(value) => f.write_fmt(format_args!("Value {value} is not callable")),
+            Self::ValueNotCallable(value) => f.write_fmt(format_args!("{} value is not callable", value.get_type())),
             Self::IdentifierIsNotDefined(ident) => f.write_fmt(format_args!("Identifier {ident} is not defined")),
             Self::IdentifierIsAlreadyDefined(ident) => f.write_fmt(format_args!("Identifier {ident} is already defined")),
             Self::ArgumentToOperatorMustBeANumber(str) => f.write_fmt(format_args!("Argument to {str} must be a number!")),

@@ -1,6 +1,6 @@
 use std::iter::Peekable;
 
-use crate::{builtin, error::Error, expr::{Expr, ExprRef, IdentRef}, scanner::Scanner, source::{IdentifierTable, Source}, token::{Token, TokenType}, value::Value};
+use crate::{builtin, error::Error, expr::{Expr, ExprRef, IdentRef}, scanner::Scanner, source::{IdentifierTable, Source}, token::{Token, TokenType}, value::{Value, ValueRef}};
 
 type ExprResult = Result<ExprRef, Error>;
 type IdentResult = Result<IdentRef, Error>;
@@ -24,7 +24,7 @@ impl <'a> Compiler<'a> {
             ("Or", builtin::get_or),
             ("Not", builtin::get_not),
             ("If", builtin::get_if),
-            ("Unit", || ExprRef::new(Expr::Value(Box::new(Value::Unit)))),
+            ("Unit", || ExprRef::new(Expr::Value(ValueRef::new(Value::Unit)))),
             ("Print", builtin::get_print),
             ("Is", builtin::get_is),
             ("IsNot", builtin::get_is_not),

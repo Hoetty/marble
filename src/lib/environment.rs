@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use crate::value::Value;
+use crate::value::ValueRef;
 
 pub type EnvRef = Rc<Environment>;
 
@@ -8,7 +8,7 @@ pub type EnvRef = Rc<Environment>;
 pub enum Environment where {
     Value {
         depth: usize,
-        value: Value,
+        value: ValueRef,
         parent: EnvRef,
     },
     Root
@@ -16,7 +16,7 @@ pub enum Environment where {
 
 impl  Environment where {
 
-    pub fn extend(environment: EnvRef, value: Value) -> EnvRef {
+    pub fn extend(environment: EnvRef, value: ValueRef) -> EnvRef {
         Rc::new(Environment::Value { value, parent: Rc::clone(&environment), depth: environment.next_depth() })
     }
 
@@ -49,15 +49,15 @@ impl  Environment where {
         }
     }
 
-    pub fn from_bottom(&self, depth: usize) -> Value {
+    pub fn from_bottom(&self, depth: usize) -> ValueRef {
         self.from_top(self.distance_from_top(depth))
     }
 
-    pub fn from_top(&self, depth: usize) -> Value {
+    pub fn from_top(&self, depth: usize) -> ValueRef {
         match self {
             Self::Root => panic!("Tried to get on environment root"),
             Self::Value { depth: _, value, parent } => if depth == 0 {
-                value.clone()
+                ValueRef::clone(value)
             } else {
                 parent.from_top(depth - 1)
             }

@@ -1,17 +1,17 @@
 use std::rc::Rc;
 
-use crate::value::Value;
+use crate::value::ValueRef;
 
 pub type IdentRef = usize;
 pub type ExprRef = Rc<Expr>;
 
-#[derive(Clone, PartialEq)]
+#[derive(Clone)]
 pub enum Expr {
     Then(ExprRef, ExprRef),
     Identifier(IdentRef),
     Call(ExprRef, ExprRef),
     String(String),
     Number(f64),
-    Value(Box<Value>),
+    Value(ValueRef),
     Fn(ExprRef)
 }
