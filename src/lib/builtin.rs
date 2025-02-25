@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{expr::{Expr, ExprRef}, value::{Value, ValueRef}};
 
 macro_rules! builtin_binary {
@@ -13,6 +11,20 @@ macro_rules! builtin_binary {
 }
 
 pub fn get_print() -> ExprRef {
+    builtin_binary!(lhs, _rhs, _env, Ok({
+        match &lhs.as_ref() {
+            Value::Number(n) => print!("{n}"),
+            Value::String(s) => print!("{s}"),
+            Value::Unit => print!("Unit"),
+            Value::Lazy(_, _, _) => panic!("Lazy passed to print"),
+            Value::Fn(_, _) => print!("Function"),
+            Value::Builtin(_) => print!("Builtin Function"),
+        };
+        Value::Unit.new_ref()
+    }))
+}
+
+pub fn get_println() -> ExprRef {
     builtin_binary!(lhs, _rhs, _env, Ok({
         match &lhs.as_ref() {
             Value::Number(n) => println!("{n}"),

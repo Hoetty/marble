@@ -25,6 +25,7 @@ impl <'a> Compiler<'a> {
             ("Not", builtin::get_not),
             ("If", builtin::get_if),
             ("Unit", || ExprRef::new(Expr::Value(ValueRef::new(Value::Unit)))),
+            ("PrintLn", builtin::get_println),
             ("Print", builtin::get_print),
             ("Is", builtin::get_is),
             ("IsNot", builtin::get_is_not),
