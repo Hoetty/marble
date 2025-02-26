@@ -1,0 +1,5 @@
+let Test be Ten in
+let IsTen be Is of Ten in
+let TenIsTen be IsTen of Ten in
+let EightIsNotTen be Not of do IsTen of Eight end in
+If of do And of TenIsTen of EightIsNotTen end of One of Zero

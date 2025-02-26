@@ -1,4 +1,0 @@
-let AddThree be fn A B C do
-    Add of do Add of A of B end of C
-end in
-AddThree of One of Two of Three

@@ -1,4 +1,4 @@
-use std::fmt::Display;
+use std::fmt::{Debug, Display};
 
 use crate::{token::Token, value::ValueRef};
 
@@ -34,5 +34,11 @@ impl Display for Error {
             Self::ArgumentToOperatorMustBeANumber(str) => f.write_fmt(format_args!("Argument to {str} must be a number!")),
             Self::ValueDependsOnItself => f.write_str("Calculation on value depends on itself"),
         }
+    }
+}
+
+impl Debug for Error {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        Display::fmt(&self, f)
     }
 }

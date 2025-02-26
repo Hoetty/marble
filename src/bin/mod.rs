@@ -1,9 +1,9 @@
-use std::{fs::read_to_string, path::PathBuf, process::exit};
+use std::path::PathBuf;
 
 mod src;
 
 use clap::Parser;
-use marble::{compiler::Compiler, interpreter::Interpreter, number::serialize, scanner::Scanner, source::Source};
+use marble::evaluate_file;
 use src::repl::input;
 
 /// Marble interpreter
@@ -19,63 +19,21 @@ pub fn main() {
     let args = Args::parse();
 
     if let Some(path) = args.file {
-        file(&path);
+        run_file(&path);
     } else {
         repl();
     }
 }
 
-pub fn repl() {
+fn repl() {
     for line in input() {
-        // let source = Source::new(&line);
-        // let mut scanner = Scanner::new(source);
-    
-        // run_scanner(&mut scanner, &source);
-
-        if let Ok(num) = line.parse() {
-            println!("{}", serialize::display_number(num));
-        }
-
-        // println!("{:?}", deserialize::parse_fraction(&line));
+        println!("{line}");
     }
 }
 
-pub fn file(file: &PathBuf) {
-    let file = read_to_string(file).unwrap();
-    let source = Source::new(&file);
-    let scanner = Scanner::new(source);
-
-    let mut compiler = Compiler::new(&source, scanner);
-    compiler.with_bindings(Compiler::default_bindings());
-    let result = compiler.compile();
-
-    match result {
-        Ok((expr, _)) => {
-            let mut interpreter = Interpreter::new(expr);
-
-            match interpreter.interpret() {
-                Ok(value) => println!("{value}"),
-                Err(e) => println!("Error -> {e}"),
-            }
-        },
-        Err((token, error)) => {
-            let line = source.line_start(&token);
-            let column = source.column_start(&token);
-            let lexeme = source.lexeme(&token);
-
-            println!("Error at '{lexeme}' {line}:{column} -> {error}");
-            exit(1);
-        },
+fn run_file(file: &PathBuf) {
+    match evaluate_file(file) {
+        Ok(value) => println!("{value}"),
+        Err(e) => println!("Error -> {e}"),
     }
 }
-
-// fn run_scanner(scanner: &mut Scanner, source: &Source) {
-//     loop {
-//         let token = scanner.next().unwrap();
-//         println!("{:?}: {:?}", token, source.lexeme(&token));
-    
-//         if token.token_type == TokenType::Eof {
-//             break;
-//         }
-//     }
-// }

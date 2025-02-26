@@ -81,13 +81,13 @@
             "cwd": "${workspaceFolder}"
         },
         {
-            "cwd": "${workspaceFolder}/marble-lsp",
+            "cwd": "${workspaceFolder}/marble-language-support",
             "name": "Extension",
             "type": "extensionHost",
             "request": "launch",
             "args": [
-                "--extensionDevelopmentPath=${workspaceFolder}",
-                "${workspaceFolder}/marble-samples"
+                "--extensionDevelopmentPath=${workspaceFolder}/marble-language-support",
+                "${workspaceFolder}/examples"
             ]
         }
     ]
