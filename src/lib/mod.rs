@@ -8,6 +8,7 @@ pub mod interpreter;
 pub mod environment;
 pub mod value;
 pub mod builtin;
+pub mod meta;
 
 /// A crate to handle numbers and their written forms
 ///  

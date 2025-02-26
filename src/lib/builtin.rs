@@ -1,4 +1,4 @@
-use crate::{expr::{Expr, ExprRef}, value::{Value, ValueRef}};
+use crate::{call, expr::{Expr, ExprRef}, fun, identifier, value::{Value, ValueRef}};
 
 macro_rules! builtin_binary {
     ($lhs: ident, $rhs: ident, $env: ident, $result: expr) => {
@@ -93,77 +93,45 @@ pub fn get_div() -> ExprRef {
 }
 
 pub fn get_true() -> ExprRef {
-    ExprRef::new(Expr::Fn(
-        ExprRef::new(Expr::Fn(
-            ExprRef::new(Expr::Identifier(1))
-        ))
-    ))
+    fun!(fun!(identifier!(1)))
 }
 
 pub fn get_false() -> ExprRef {
-    ExprRef::new(Expr::Fn(
-        ExprRef::new(Expr::Fn(
-            ExprRef::new(Expr::Identifier(0))
-        ))
-    ))
+    fun!(fun!(identifier!(0)))
 }
 
 pub fn get_not() -> ExprRef {
-    ExprRef::new(Expr::Fn(
-        ExprRef::new(Expr::Fn(
-            ExprRef::new(Expr::Fn(
-                ExprRef::new(Expr::Call(
-                    ExprRef::new(Expr::Call(
-                        ExprRef::new(Expr::Identifier(2)),
-                        ExprRef::new(Expr::Identifier(0))
-                    )),
-                    ExprRef::new(Expr::Identifier(1))
-                ))
-            ))
-        )),
-    ))
+    fun!(fun!(fun!(
+        call!(
+            call!(identifier!(2), identifier!(0)), 
+            identifier!(1)
+        )
+    )))
 }
 
 pub fn get_if() -> ExprRef {
-    ExprRef::new(Expr::Fn(
-        ExprRef::new(Expr::Fn(
-            ExprRef::new(Expr::Fn(
-                ExprRef::new(Expr::Call(
-                    ExprRef::new(Expr::Call(
-                        ExprRef::new(Expr::Identifier(2)),
-                        ExprRef::new(Expr::Identifier(1))
-                    )),
-                    ExprRef::new(Expr::Identifier(0))
-                ))
-            ))
-        )),
-    ))
+    fun!(fun!(fun!(
+        call!(
+            call!(identifier!(2), identifier!(1)), 
+            identifier!(0)
+        )
+    )))
 }
 
 pub fn get_or() -> ExprRef {
-    ExprRef::new(Expr::Fn(
-        ExprRef::new(Expr::Fn(
-            ExprRef::new(Expr::Call(
-                ExprRef::new(Expr::Call(
-                    ExprRef::new(Expr::Identifier(1)),
-                    ExprRef::new(Expr::Identifier(1))
-                )),
-                ExprRef::new(Expr::Identifier(0))
-            ))
-        )),
+    fun!(fun!(
+        call!(
+            call!(identifier!(1), identifier!(1)), 
+            identifier!(0)
+        )
     ))
 }
 
 pub fn get_and() -> ExprRef {
-    ExprRef::new(Expr::Fn(
-        ExprRef::new(Expr::Fn(
-            ExprRef::new(Expr::Call(
-                ExprRef::new(Expr::Call(
-                    ExprRef::new(Expr::Identifier(1)),
-                    ExprRef::new(Expr::Identifier(0))
-                )),
-                ExprRef::new(Expr::Identifier(1))
-            ))
-        )),
+    fun!(fun!(
+        call!(
+            call!(identifier!(1), identifier!(0)), 
+            identifier!(1)
+        )
     ))
 }
