@@ -16,6 +16,7 @@ pub mod environment;
 pub mod value;
 pub mod builtin;
 pub mod meta;
+pub mod object_store;
 
 #[cfg(test)]
 pub mod tests;

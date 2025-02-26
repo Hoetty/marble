@@ -17,8 +17,8 @@ impl <'a> Compiler<'a> {
 
     pub fn default_bindings() -> Vec<Binding<'static>> {
         vec![
-            ("True", builtin::get_true), // 0
-            ("False", builtin::get_false), // 1
+            ("True", builtin::get_true),
+            ("False", builtin::get_false),
             ("And", builtin::get_and),
             ("Or", builtin::get_or),
             ("Not", builtin::get_not),

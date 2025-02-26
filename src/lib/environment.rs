@@ -4,10 +4,9 @@ use crate::value::ValueRef;
 
 pub type EnvRef = Rc<Environment>;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Environment where {
     Value {
-        depth: usize,
         value: ValueRef,
         parent: EnvRef,
     },
@@ -17,19 +16,12 @@ pub enum Environment where {
 impl  Environment where {
 
     pub fn extend(environment: EnvRef, value: ValueRef) -> EnvRef {
-        Rc::new(Environment::Value { value, parent: Rc::clone(&environment), depth: environment.next_depth() })
-    }
-
-    pub fn next_depth(&self) -> usize {
-        match self {
-            Environment::Value { depth, value: _, parent: _ } => depth + 1,
-            Environment::Root => 0,
-        }
+        Rc::new(Environment::Value { value, parent: Rc::clone(&environment) })
     }
 
     pub fn pop(environment: &EnvRef) -> EnvRef {
         match Rc::as_ref(environment) {
-            Environment::Value { depth: _, value: _, parent } => Rc::clone(parent),
+            Environment::Value { value: _, parent } => Rc::clone(parent),
             Environment::Root => panic!("Popped the root Environment"),
         }
     }
@@ -42,24 +34,13 @@ impl  Environment where {
         Rc::new(Environment::Root)
     }
 
-    pub fn distance_from_top(&self, depth: usize) -> usize {
-        match self {
-            Environment::Value { depth: other, value: _, parent: _ } => other - depth,
-            Environment::Root => depth + 1,
-        }
-    }
-
-    pub fn from_bottom(&self, depth: usize) -> ValueRef {
-        self.from_top(self.distance_from_top(depth))
-    }
-
-    pub fn from_top(&self, depth: usize) -> ValueRef {
+    pub fn find(&self, depth: usize) -> ValueRef {
         match self {
             Self::Root => panic!("Tried to get on environment root"),
-            Self::Value { depth: _, value, parent } => if depth == 0 {
+            Self::Value { value, parent } => if depth == 0 {
                 ValueRef::clone(value)
             } else {
-                parent.from_top(depth - 1)
+                parent.find(depth - 1)
             }
         }
     }

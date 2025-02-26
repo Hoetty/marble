@@ -45,9 +45,9 @@ pub fn get_is() -> ExprRef {
         (Value::Unit, Value::Unit) => true,
         _ => false,
     } { 
-        env.from_bottom(0)
+        env.true_fn.clone()
     } else { 
-        env.from_bottom(1)
+        env.false_fn.clone()
     }))
 }
 
@@ -58,9 +58,9 @@ pub fn get_is_not() -> ExprRef {
         (Value::Unit, Value::Unit) => true,
         _ => false,
     } { 
-        env.from_bottom(1)
+        env.false_fn.clone()
     } else { 
-        env.from_bottom(0)
+        env.true_fn.clone()
     }))
 }
 

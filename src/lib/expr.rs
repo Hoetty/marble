@@ -5,7 +5,7 @@ use crate::value::ValueRef;
 pub type IdentRef = usize;
 pub type ExprRef = Rc<Expr>;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub enum Expr {
     Then(ExprRef, ExprRef),
     Identifier(IdentRef),

@@ -1,6 +1,6 @@
-use std::{cell::RefCell, fmt::Display, rc::Rc};
+use std::{cell::RefCell, fmt::{Debug, Display}, rc::Rc};
 
-use crate::{environment::EnvRef, error::Error, expr::ExprRef, interpreter::ValueResult};
+use crate::{environment::EnvRef, error::Error, expr::ExprRef, interpreter::ValueResult, object_store::ObjectStore};
 
 pub type ValueRef = Rc<Value>;
 
@@ -10,7 +10,7 @@ pub enum Value {
     Unit,
     Lazy(ExprRef, EnvRef, RefCell<Option<ValueRef>>),
     Fn(ExprRef, EnvRef),
-    Builtin(Box<dyn Fn(ValueRef, EnvRef) -> ValueResult>)
+    Builtin(Box<dyn Fn(ValueRef, &ObjectStore) -> ValueResult>)
 }
 
 impl Value {
@@ -48,6 +48,19 @@ impl Display for Value {
             Value::Lazy(_, _, _) => f.write_str("Lazy"),
             Value::Fn(_, _) => f.write_str("Function"),
             Value::Builtin(_) => f.write_str("Builtin Function"),
+        }
+    }
+}
+
+impl Debug for Value {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Number(arg0) => f.debug_tuple("Number").field(arg0).finish(),
+            Self::String(arg0) => f.debug_tuple("String").field(arg0).finish(),
+            Self::Unit => write!(f, "Unit"),
+            Self::Lazy(arg0, arg1, arg2) => f.debug_tuple("Lazy").field(arg0).field(arg1).field(arg2).finish(),
+            Self::Fn(arg0, arg1) => f.debug_tuple("Fn").field(arg0).field(arg1).finish(),
+            Self::Builtin(_) => f.debug_tuple("Builtin").field(&"Function").finish(),
         }
     }
 }

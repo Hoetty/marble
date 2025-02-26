@@ -57,7 +57,7 @@
                 }
             },
             "args": [
-                "marble-samples/test.mrbl"
+                "examples/test.mrbl"
             ],
             "cwd": "${workspaceFolder}"
         },

@@ -1,12 +1,13 @@
 use std::{cell::RefCell, rc::Rc};
 
-use crate::{environment::{EnvRef, Environment}, error::Error, expr::{Expr, ExprRef}, value::{Value, ValueRef}};
+use crate::{environment::{EnvRef, Environment}, error::Error, expr::{Expr, ExprRef}, object_store::ObjectStore, value::{Value, ValueRef}};
 
 pub type ValueResult = Result<ValueRef, Error>;
 
 pub struct Interpreter {
     environment: EnvRef,
     expr: ExprRef,
+    objects: ObjectStore
 }
 
 impl Interpreter {
@@ -21,7 +22,7 @@ impl Interpreter {
             Expr::Call(_, _) | Expr::Then(_, _) => {
                 Ok(Value::Lazy(expr, EnvRef::clone(&self.environment), RefCell::new(None)).new_ref())
             },
-            Expr::Identifier(ident) => Ok(self.environment.from_top(*ident).clone()),
+            Expr::Identifier(ident) => Ok(self.environment.find(*ident).clone()),
             Expr::String(ref s) => Ok(Value::String(s.clone()).new_ref()),
             Expr::Number(n) => Ok(Value::Number(*n).new_ref()),
             Expr::Value(v) => Ok(ValueRef::clone(v)),
@@ -33,7 +34,7 @@ impl Interpreter {
         let lhs = self.force(lhs)?;
         match lhs.as_ref() {
             Value::Fn(expr, env) => self.evaluate_fn(ExprRef::clone(expr), EnvRef::clone(env), rhs),
-            Value::Builtin(function) => function(self.force(rhs)?, EnvRef::clone(&self.environment)),
+            Value::Builtin(function) => function(self.force(rhs)?, &self.objects),
             _ => { Err(Error::ValueNotCallable(lhs)) }
         }
     }
@@ -93,7 +94,8 @@ impl Interpreter {
     pub fn new(expr: ExprRef) -> Self {
         Self { 
             environment: Environment::root(), 
-            expr
+            expr,
+            objects: ObjectStore::default()
         }
     }
 }
