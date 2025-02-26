@@ -152,16 +152,28 @@ impl <'a> Compiler<'a> {
     }
 
     fn function(&mut self) -> ExprResult {
-        let argument = self.try_identifier()?;
-        self.identifiers.push(argument)?;
+        let mut arguments = vec![self.try_identifier()?];
+
+        while let Some(token) = self.matches(TokenType::Identifier) {
+            arguments.push(&self.source.lexeme(&token));
+        }
+
+        for identifier in &arguments {
+            self.identifiers.push(identifier)?;
+        }
 
         self.match_consume(TokenType::Do, Error::ExpectedDoAsFunctionBody)?;
 
         let body = self.block()?;
 
-        self.identifiers.pop();
+        let mut expr = body;
 
-        Ok(ExprRef::new(Expr::Fn(body)))
+        for _ in 0..arguments.len() {
+            expr = ExprRef::new(Expr::Fn(expr));
+            self.identifiers.pop();
+        }
+
+        Ok(expr)
     }
 
     fn try_identifier(&mut self) -> Result<&'a str, Error> {

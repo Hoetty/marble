@@ -1,4 +1,4 @@
-let 5 be Five in 
-let + be Add in
-PrintLn of do + of 5 of 5 end then
-Unit
+let AddThree be fn A B C do
+    Add of do Add of A of B end of C
+end in
+AddThree of One of Two of Three

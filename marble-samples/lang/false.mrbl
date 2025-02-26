@@ -1,5 +1,3 @@
-fn L do
-    fn R do
-        R
-    end
+fn L R do
+    R
 end

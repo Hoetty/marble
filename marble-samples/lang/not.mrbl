@@ -1,7 +1,3 @@
-fn Predicate do
-    fn L do
-        fn R do
-            Predicate of R of L
-        end
-    end
+fn Predicate L R do
+    Predicate of R of L
 end
