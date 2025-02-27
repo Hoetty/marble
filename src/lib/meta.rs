@@ -25,3 +25,10 @@ macro_rules! call {
         ExprRef::new(Expr::Call($lhs, $rhs))
     };
 }
+
+#[macro_export]
+macro_rules! unit {
+    () => {
+        ExprRef::new(Expr::Value(Value::Unit.new_ref()))
+    };
+}

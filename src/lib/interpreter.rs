@@ -19,7 +19,7 @@ impl Interpreter {
 
     fn evaluate(&mut self, expr: ExprRef) -> ValueResult {
         match expr.as_ref() {
-            Expr::Call(_, _) | Expr::Then(_, _) => {
+            Expr::Call(_, _) => {
                 Ok(Value::Lazy(expr, EnvRef::clone(&self.environment), RefCell::new(None)).new_ref())
             },
             Expr::Identifier(ident) => Ok(self.environment.find(*ident).clone()),
@@ -52,7 +52,7 @@ impl Interpreter {
         while let Value::Lazy(expr, env, possible) = value.as_ref() {
             let result = match *possible.borrow() {
                 Some(ref v) => ValueRef::clone(v),
-                None =>  match expr.as_ref() {
+                None => match expr.as_ref() {
                     Expr::Call(lhs, rhs) => {
                         let previous_env = EnvRef::clone(&self.environment);
                         self.environment = EnvRef::clone(env);
@@ -65,19 +65,6 @@ impl Interpreter {
                         self.environment = previous_env;
 
                         result
-                    },
-                    Expr::Then(lhs, rhs) => {
-                        let previous_env = EnvRef::clone(&self.environment);
-                        self.environment = EnvRef::clone(env);
-
-                        let lhs = self.evaluate(ExprRef::clone(lhs))?;
-                        let rhs = self.evaluate(ExprRef::clone(rhs))?;
-
-                        self.call(lhs, Value::Unit.new_ref())?;
-
-                        self.environment = previous_env;
-
-                        rhs
                     },
                     _ => self.evaluate(ExprRef::clone(expr))?
                 }

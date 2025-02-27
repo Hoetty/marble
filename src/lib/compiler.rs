@@ -100,8 +100,11 @@ impl <'a> Compiler<'a> {
         let mut lhs = self.let_expression()?;
 
         while self.matches(TokenType::Then).is_some() {
+            // The value here is discarded, then as a variable is never accessable as it is a keyword
+            self.identifiers.push("then")?;
             let rhs = self.let_expression()?;
-            lhs = ExprRef::new(Expr::Then(lhs, rhs));
+            self.identifiers.pop();
+            lhs = Expr::Call(lhs, Expr::Fn(rhs).new_ref()).new_ref();
         }
 
         Ok(lhs)

@@ -1,4 +1,5 @@
 use crate::environment::Environment;
+use crate::unit;
 use crate::{call, expr::{Expr, ExprRef}, fun, fun_val, identifier, value::{Value, ValueRef}};
 
 macro_rules! builtin_binary {
@@ -12,7 +13,7 @@ macro_rules! builtin_binary {
 }
 
 pub fn get_print() -> ValueRef {
-    builtin_binary!(lhs, _rhs, _env, Ok({
+    ValueRef::new(Value::Builtin(Box::new(move |lhs, _| {
         match &lhs.as_ref() {
             Value::Number(n) => print!("{n}"),
             Value::String(s) => print!("{s}"),
@@ -21,12 +22,13 @@ pub fn get_print() -> ValueRef {
             Value::Fn(_, _) => print!("Function"),
             Value::Builtin(_) => print!("Builtin Function"),
         };
-        Value::Unit.new_ref()
-    }))
+
+        Ok(fun_val!(call!(identifier!(0), unit!())))
+    })))
 }
 
 pub fn get_println() -> ValueRef {
-    builtin_binary!(lhs, _rhs, _env, Ok({
+    ValueRef::new(Value::Builtin(Box::new(move |lhs, _| {
         match &lhs.as_ref() {
             Value::Number(n) => println!("{n}"),
             Value::String(s) => println!("{s}"),
@@ -35,8 +37,9 @@ pub fn get_println() -> ValueRef {
             Value::Fn(_, _) => println!("Function"),
             Value::Builtin(_) => println!("Builtin Function"),
         };
-        Value::Unit.new_ref()
-    }))
+
+        Ok(fun_val!(call!(identifier!(0), unit!())))
+    })))
 }
 
 pub fn get_is() -> ValueRef {

@@ -7,7 +7,7 @@
         ["do", "end"],
     ],
     "autoClosingPairs": [
-        ["do", "end"],
+        ["do", " end"],
     ],
     "surroundingPairs": []
 }
