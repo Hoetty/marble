@@ -210,7 +210,7 @@ Through the implemention of ```let``` and ```then``` through function calls, eve
 
 A VS Code Extension for syntax hightlighting is available under ```/marble-language-support```
 
-### Running Marble Programs
+## Running Marble Programs
 
 You can build the project using cargo and enter an interactive REPL using:
 ```sh
