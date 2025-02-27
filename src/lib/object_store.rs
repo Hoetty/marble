@@ -1,14 +1,4 @@
-use crate::{builtin, environment::Environment, expr::Expr, value::{Value, ValueRef}};
-
-macro_rules! fn_to_val {
-    ($expr: expr) => {
-        match $expr.as_ref() {
-            Expr::Fn(body) => Value::Fn(body.clone(), Environment::root()).new_ref(),
-            Expr::Value(v) => v.clone(),
-            _ => panic!()
-        }
-    };
-}
+use crate::{builtin, value::{Value, ValueRef}};
 
 #[derive(Clone)]
 pub struct ObjectStore {
@@ -32,21 +22,21 @@ pub struct ObjectStore {
 impl Default for ObjectStore {
     fn default() -> Self {
         Self { 
-            true_fn: fn_to_val!(builtin::get_true()), 
-            false_fn: fn_to_val!(builtin::get_false()), 
-            not: fn_to_val!(builtin::get_not()),
-            and: fn_to_val!(builtin::get_and()),
-            or: fn_to_val!(builtin::get_or()),
-            if_fn: fn_to_val!(builtin::get_if()),
+            true_fn: builtin::get_true(), 
+            false_fn: builtin::get_false(), 
+            not: builtin::get_not(),
+            and: builtin::get_and(),
+            or: builtin::get_or(),
+            if_fn: builtin::get_if(),
             unit: ValueRef::new(Value::Unit),
-            println: fn_to_val!(builtin::get_println()),
-            print: fn_to_val!(builtin::get_print()),
-            is: fn_to_val!(builtin::get_is()),
-            is_not: fn_to_val!(builtin::get_is_not()),
-            add: fn_to_val!(builtin::get_add()),
-            sub: fn_to_val!(builtin::get_sub()),
-            mul: fn_to_val!(builtin::get_mul()),
-            div: fn_to_val!(builtin::get_div()),
+            println: builtin::get_println(),
+            print: builtin::get_print(),
+            is: builtin::get_is(),
+            is_not: builtin::get_is_not(),
+            add: builtin::get_add(),
+            sub: builtin::get_sub(),
+            mul: builtin::get_mul(),
+            div: builtin::get_div(),
         }
     }
 }

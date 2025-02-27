@@ -6,6 +6,13 @@ macro_rules! fun {
 }
 
 #[macro_export]
+macro_rules! fun_val {
+    ($body: expr) => {
+        ValueRef::new(Value::Fn($body, Environment::root()))
+    };
+}
+
+#[macro_export]
 macro_rules! identifier {
     ($ident: expr) => {
         ExprRef::new(Expr::Identifier($ident))

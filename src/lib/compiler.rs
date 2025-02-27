@@ -4,7 +4,7 @@ use crate::{builtin, error::Error, expr::{Expr, ExprRef}, scanner::Scanner, sour
 
 type ExprResult = Result<ExprRef, Error>;
 
-type Binding<'a> = (&'a str, fn () -> ExprRef);
+type Binding<'a> = (&'a str, fn () -> ValueRef);
 
 pub struct Compiler<'a> {
     source: &'a Source<'a>,
@@ -23,7 +23,7 @@ impl <'a> Compiler<'a> {
             ("Or", builtin::get_or),
             ("Not", builtin::get_not),
             ("If", builtin::get_if),
-            ("Unit", || ExprRef::new(Expr::Value(ValueRef::new(Value::Unit)))),
+            ("Unit", || ValueRef::new(Value::Unit)),
             ("PrintLn", builtin::get_println),
             ("Print", builtin::get_print),
             ("Is", builtin::get_is),
@@ -59,7 +59,7 @@ impl <'a> Compiler<'a> {
 
         for (_, provider) in self.extra_bindings.iter().rev() {
             let function = ExprRef::new(Expr::Fn(expr));
-            expr = ExprRef::new(Expr::Call(function, provider()))
+            expr = ExprRef::new(Expr::Call(function, ExprRef::new(Expr::Value(provider()))));
         }
 
         self.match_consume(TokenType::Eof, Error::ExpectedEofAfterExpression).map_err(|e| (self.consume(), e))?;

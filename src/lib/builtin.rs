@@ -1,16 +1,17 @@
-use crate::{call, expr::{Expr, ExprRef}, fun, identifier, value::{Value, ValueRef}};
+use crate::environment::Environment;
+use crate::{call, expr::{Expr, ExprRef}, fun, fun_val, identifier, value::{Value, ValueRef}};
 
 macro_rules! builtin_binary {
     ($lhs: ident, $rhs: ident, $env: ident, $result: expr) => {
-        ExprRef::new(Expr::Value(ValueRef::new(Value::Builtin(Box::new(move |$lhs, _| {
+        ValueRef::new(Value::Builtin(Box::new(move |$lhs, _| {
             Ok(Value::Builtin(Box::new(move |$rhs, $env| {
                 $result
             })).new_ref())
-        })))))
+        })))
     };
 }
 
-pub fn get_print() -> ExprRef {
+pub fn get_print() -> ValueRef {
     builtin_binary!(lhs, _rhs, _env, Ok({
         match &lhs.as_ref() {
             Value::Number(n) => print!("{n}"),
@@ -24,7 +25,7 @@ pub fn get_print() -> ExprRef {
     }))
 }
 
-pub fn get_println() -> ExprRef {
+pub fn get_println() -> ValueRef {
     builtin_binary!(lhs, _rhs, _env, Ok({
         match &lhs.as_ref() {
             Value::Number(n) => println!("{n}"),
@@ -38,7 +39,7 @@ pub fn get_println() -> ExprRef {
     }))
 }
 
-pub fn get_is() -> ExprRef {
+pub fn get_is() -> ValueRef {
     builtin_binary!(lhs, rhs, env, Ok(if match (lhs.as_ref(), rhs.as_ref()) {
         (Value::Number(l0), Value::Number(r0)) => l0 == r0,
         (Value::String(l0), Value::String(r0)) => l0 == r0,
@@ -51,7 +52,7 @@ pub fn get_is() -> ExprRef {
     }))
 }
 
-pub fn get_is_not() -> ExprRef {
+pub fn get_is_not() -> ValueRef {
     builtin_binary!(lhs, rhs, env, Ok(if match (lhs.as_ref(), rhs.as_ref()) {
         (Value::Number(l0), Value::Number(r0)) => l0 == r0,
         (Value::String(l0), Value::String(r0)) => l0 == r0,
@@ -66,42 +67,42 @@ pub fn get_is_not() -> ExprRef {
 
 macro_rules! builtin_number_binary {
     ($lhs: ident, $rhs: ident, $env: ident, $name: literal, $result: expr) => {{
-        ExprRef::new(Expr::Value(Value::Builtin(Box::new(move |$lhs, _| {
+        Value::Builtin(Box::new(move |$lhs, _| {
             let $lhs = $lhs.number_for_operator($name)?;
             Ok(Value::Builtin(Box::new(move |$rhs, $env| {
                 let $rhs = $rhs.number_for_operator($name)?;
                 $result
             })).new_ref())
-        })).new_ref()))
+        })).new_ref()
     }};
 }
 
-pub fn get_add() -> ExprRef {
+pub fn get_add() -> ValueRef {
     builtin_number_binary!(lhs, rhs, _env, "Add", Ok(Value::Number(lhs + rhs).new_ref()))
 }
 
-pub fn get_sub() -> ExprRef {
+pub fn get_sub() -> ValueRef {
     builtin_number_binary!(lhs, rhs, _env, "Sub", Ok(Value::Number(lhs - rhs).new_ref()))
 }
 
-pub fn get_mul() -> ExprRef {
+pub fn get_mul() -> ValueRef {
     builtin_number_binary!(lhs, rhs, _env, "Mul", Ok(Value::Number(lhs * rhs).new_ref()))
 }
 
-pub fn get_div() -> ExprRef {
+pub fn get_div() -> ValueRef {
     builtin_number_binary!(lhs, rhs, _env, "Div", Ok(Value::Number(lhs / rhs).new_ref()))
 }
 
-pub fn get_true() -> ExprRef {
-    fun!(fun!(identifier!(1)))
+pub fn get_true() -> ValueRef {
+    fun_val!(fun!(identifier!(1)))
 }
 
-pub fn get_false() -> ExprRef {
-    fun!(fun!(identifier!(0)))
+pub fn get_false() -> ValueRef {
+    fun_val!(fun!(identifier!(0)))
 }
 
-pub fn get_not() -> ExprRef {
-    fun!(fun!(fun!(
+pub fn get_not() -> ValueRef {
+    fun_val!(fun!(fun!(
         call!(
             call!(identifier!(2), identifier!(0)), 
             identifier!(1)
@@ -109,8 +110,8 @@ pub fn get_not() -> ExprRef {
     )))
 }
 
-pub fn get_if() -> ExprRef {
-    fun!(fun!(fun!(
+pub fn get_if() -> ValueRef {
+    fun_val!(fun!(fun!(
         call!(
             call!(identifier!(2), identifier!(1)), 
             identifier!(0)
@@ -118,8 +119,8 @@ pub fn get_if() -> ExprRef {
     )))
 }
 
-pub fn get_or() -> ExprRef {
-    fun!(fun!(
+pub fn get_or() -> ValueRef {
+    fun_val!(fun!(
         call!(
             call!(identifier!(1), identifier!(1)), 
             identifier!(0)
@@ -127,8 +128,8 @@ pub fn get_or() -> ExprRef {
     ))
 }
 
-pub fn get_and() -> ExprRef {
-    fun!(fun!(
+pub fn get_and() -> ValueRef {
+    fun_val!(fun!(
         call!(
             call!(identifier!(1), identifier!(0)), 
             identifier!(1)
