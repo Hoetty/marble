@@ -3,7 +3,7 @@ use std::path::PathBuf;
 mod src;
 
 use clap::Parser;
-use marble::evaluate_file;
+use marble::{evaluate_file, evaluate_string};
 use src::repl::input;
 
 /// Marble interpreter
@@ -27,7 +27,10 @@ pub fn main() {
 
 fn repl() {
     for line in input() {
-        println!("{line}");
+        match evaluate_string(&line) {
+            Ok(value) => println!("{value}"),
+            Err(e) => println!("Error -> {e}"),
+        }
     }
 }
 
