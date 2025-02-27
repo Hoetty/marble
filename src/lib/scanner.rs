@@ -120,17 +120,24 @@ impl <'a> Scanner<'a> {
 
     fn consume_until(&mut self, target: &str) {
         while !self.is_at_end() {
-            if self.start + 1 + target.len() >= self.current {
-                self.consume();
+            let c = self.consume();
+
+            if !c.is_ascii_whitespace() {
                 continue;
             }
 
-            let test = &self.source.str[self.current - 1 - target.len()..self.current];
+            let mut test = target.chars();
 
-            if (test.as_bytes()[0] as char).is_ascii_whitespace() && &test[1..] == target {
-                return;
-            } else {
-                self.consume();
+            while !self.is_at_end() {
+                let source_char = self.consume();
+                let test_char = test.next();
+
+                match test_char {
+                    None if source_char.is_ascii_whitespace() => return,
+                    None => break,
+                    Some(c) if c != source_char => break,
+                    _ => {}
+                }
             }
         }
     }
@@ -139,8 +146,10 @@ impl <'a> Scanner<'a> {
         self.chars.peek().unwrap()
     }
 
-    fn consume(&mut self) {
-        self.current += self.chars.next().unwrap().len_utf8()
+    fn consume(&mut self) -> char {
+        let c = *self.peek();
+        self.current += self.chars.next().unwrap().len_utf8();
+        c
     }
 
     pub fn new(source: Source<'a>) -> Self {
