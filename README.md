@@ -209,3 +209,15 @@ Through the implemention of ```let``` and ```then``` through function calls, eve
 ## Editor Support
 
 A VS Code Extension for syntax hightlighting is available under ```/marble-language-support```
+
+### Running Marble Programs
+
+You can build the project using cargo and enter an interactive REPL using:
+```sh
+cargo run -r
+```
+
+If you want to execute a file, you should pass the path to the file as argument:
+```sh
+cargo run -r -- path/to/my/file.mrbl
+```
