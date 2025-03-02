@@ -44,7 +44,7 @@ impl <'a> Scanner<'a> {
 
         match self.next_word() {
             "" => self.create_token(TokenType::Eof),
-            "string" => self.create_token(TokenType::String),
+            "string" => self.create_token(TokenType::String(true)),
             "str" => self.string(),
             "com" => {
                 // The comment is consumed but not returned
@@ -80,8 +80,8 @@ impl <'a> Scanner<'a> {
     }
 
     fn string(&mut self) -> Token {
-        self.consume_until("ing");
-        self.create_token(TokenType::String)
+        let is_terminated = self.consume_until("ing");
+        self.create_token(TokenType::String(is_terminated))
     }
 
     fn check_keyword(word: &str) -> Option<TokenType> {
@@ -118,7 +118,7 @@ impl <'a> Scanner<'a> {
         self.peek().is_ascii_whitespace()
     }
 
-    fn consume_until(&mut self, target: &str) {
+    fn consume_until(&mut self, target: &str) -> bool {
         while !self.is_at_end() {
             let c = self.consume();
 
@@ -126,20 +126,18 @@ impl <'a> Scanner<'a> {
                 continue;
             }
 
-            let mut test = target.chars();
+            if self.source.str[self.current..].starts_with(target) {
+                for _ in 0..target.len() {
+                    self.consume();
+                }
 
-            while !self.is_at_end() {
-                let source_char = self.consume();
-                let test_char = test.next();
-
-                match test_char {
-                    None if source_char.is_ascii_whitespace() => return,
-                    None => break,
-                    Some(c) if c != source_char => break,
-                    _ => {}
+                if self.is_at_end() || self.consume().is_ascii_whitespace() {
+                    return true;
                 }
             }
         }
+
+        false
     }
 
     fn peek(&mut self) -> &char {

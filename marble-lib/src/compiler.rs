@@ -126,12 +126,13 @@ impl <'a> Compiler<'a> {
         match token.token_type {
             TokenType::Do => self.block(),
             TokenType::Fn => self.function(),
-            TokenType::String => {
+            TokenType::String(is_terminated) => {
                 let lexeme = self.source.lexeme(&token);
                 match lexeme {
                     "string" => Ok(self.string_of("")),
-                    _ if lexeme.len() == 7 => Ok(self.string_of("")),
-                    _ => Ok(self.string_of(&lexeme[4..lexeme.len() - 4])),
+                    _ if is_terminated && lexeme.len() == 7 => Ok(self.string_of("")),
+                    _ if is_terminated => Ok(self.string_of(&lexeme[4..lexeme.len() - 4])),
+                    _ => Ok(self.string_of(&lexeme[4..])),
                 }
             },
             TokenType::Number(num) => Ok(ExprRef::new(Expr::Number(num))),
