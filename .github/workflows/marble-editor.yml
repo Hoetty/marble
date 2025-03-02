@@ -1,0 +1,35 @@
+name: Rust
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Build Editor
+      run: ${PWD}/marble-wasm/build
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ./marble-editor
+
+deploy:
+  environment:
+    name: github-pages
+    url: ${{ steps.deployment.outputs.page_url }}
+  needs: build
+  runs-on: ubuntu-latest
+  name: Deploy Editor
+  steps:
+    - name: Deploy Editor to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v4

@@ -1,15 +1,10 @@
 [package]
-name = "marble"
+name = "imarble"
 version = "0.1.0"
 edition = "2021"
 
-[lib]
-name = "marble"
-path = "src/lib/mod.rs"
-
-[[bin]]
-name = "imarble"
-path = "src/bin/mod.rs"
-
 [dependencies]
 clap = { version = "4.5.28", features = ["derive"] }
+marble = { path = "../marble-lib"}
+
+[workspace]

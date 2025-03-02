@@ -1,10 +1,10 @@
 use std::path::PathBuf;
 
-mod src;
+mod repl;
 
 use clap::Parser;
 use marble::{evaluate_file, evaluate_string};
-use src::repl::input;
+use repl::input;
 
 /// Marble interpreter
 #[derive(Parser, Debug)]
