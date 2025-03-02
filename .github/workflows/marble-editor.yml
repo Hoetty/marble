@@ -17,7 +17,7 @@ jobs:
     - uses: actions/checkout@v4
     - name: Build Editor
       working-directory: ./marble-wasm
-      run: build
+      run: ./build.sh
     - name: Upload artifact
       uses: actions/upload-pages-artifact@v3
       with:
