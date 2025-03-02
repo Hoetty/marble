@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::cell::RefCell;
 
 use crate::{environment::{EnvRef, Environment}, error::Error, expr::{Expr, ExprRef}, object_store::ObjectStore, value::{Value, ValueRef}};
 
@@ -13,7 +13,7 @@ pub struct Interpreter {
 impl Interpreter {
 
     pub fn interpret(&mut self) -> ValueResult {
-        let value = self.evaluate(Rc::clone(&self.expr))?;
+        let value = self.evaluate(ExprRef::clone(&self.expr))?;
         self.force(value)
     }
 
@@ -40,7 +40,7 @@ impl Interpreter {
     }
 
     fn evaluate_fn(&mut self, expr: ExprRef, environment: EnvRef, value: ValueRef) -> ValueResult {
-        let previous = Rc::clone(&self.environment);
+        let previous = EnvRef::clone(&self.environment);
         self.environment = Environment::extend(environment, value);
         let return_value = self.evaluate(expr);
         self.environment = previous;

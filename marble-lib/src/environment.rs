@@ -16,22 +16,22 @@ pub enum Environment where {
 impl  Environment where {
 
     pub fn extend(environment: EnvRef, value: ValueRef) -> EnvRef {
-        Rc::new(Environment::Value { value, parent: Rc::clone(&environment) })
+        EnvRef::new(Environment::Value { value, parent: EnvRef::clone(&environment) })
     }
 
     pub fn pop(environment: &EnvRef) -> EnvRef {
-        match Rc::as_ref(environment) {
-            Environment::Value { value: _, parent } => Rc::clone(parent),
+        match EnvRef::as_ref(environment) {
+            Environment::Value { value: _, parent } => EnvRef::clone(parent),
             Environment::Root => panic!("Popped the root Environment"),
         }
     }
 
     pub fn clone(environment: &EnvRef) -> EnvRef {
-        Rc::clone(environment)
+        EnvRef::clone(environment)
     }
 
     pub fn root() -> EnvRef {
-        Rc::new(Environment::Root)
+        EnvRef::new(Environment::Root)
     }
 
     pub fn find(&self, depth: usize) -> ValueRef {
