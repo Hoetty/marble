@@ -1,9 +1,9 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use crate::value::ValueRef;
 
 pub type IdentRef = usize;
-pub type ExprRef = Rc<Expr>;
+pub type ExprRef = Arc<Expr>;
 
 #[derive(Clone, Debug)]
 pub enum Expr {

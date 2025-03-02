@@ -29,6 +29,6 @@ macro_rules! call {
 #[macro_export]
 macro_rules! unit {
     () => {
-        ExprRef::new(Expr::Value(Value::Unit.new_ref()))
+        ExprRef::new(Expr::Value(builtin::UNIT.clone()))
     };
 }

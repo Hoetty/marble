@@ -1,11 +1,11 @@
-use std::rc::Rc;
+use std::sync::{Arc, LazyLock};
 
 use crate::value::ValueRef;
 
-pub type EnvRef = Rc<Environment>;
+pub type EnvRef = Arc<Environment>;
 
 #[derive(Clone, Debug)]
-pub enum Environment where {
+pub enum Environment {
     Value {
         value: ValueRef,
         parent: EnvRef,
@@ -13,7 +13,9 @@ pub enum Environment where {
     Root
 }
 
-impl  Environment where {
+impl Environment {
+
+    pub const ROOT: LazyLock<EnvRef> = LazyLock::new(|| EnvRef::new(Environment::Root));
 
     pub fn extend(environment: EnvRef, value: ValueRef) -> EnvRef {
         EnvRef::new(Environment::Value { value, parent: EnvRef::clone(&environment) })
@@ -26,12 +28,8 @@ impl  Environment where {
         }
     }
 
-    pub fn clone(environment: &EnvRef) -> EnvRef {
-        EnvRef::clone(environment)
-    }
-
     pub fn root() -> EnvRef {
-        EnvRef::new(Environment::Root)
+        Self::ROOT.clone()
     }
 
     pub fn find(&self, depth: usize) -> ValueRef {

@@ -1,10 +1,10 @@
 use std::iter::Peekable;
 
-use crate::{builtin, error::Error, expr::{Expr, ExprRef}, scanner::Scanner, source::{IdentifierTable, Source}, token::{Token, TokenType}, value::{Value, ValueRef}};
+use crate::{builtin, error::Error, expr::{Expr, ExprRef}, scanner::Scanner, source::{IdentifierTable, Source}, token::{Token, TokenType}, value::ValueRef};
 
 type ExprResult = Result<ExprRef, Error>;
 
-type Binding<'a> = (&'a str, fn () -> ValueRef);
+type Binding<'a> = (&'a str, ValueRef);
 
 pub struct Compiler<'a> {
     source: &'a Source<'a>,
@@ -17,21 +17,21 @@ impl <'a> Compiler<'a> {
 
     pub fn default_bindings() -> Vec<Binding<'static>> {
         vec![
-            ("True", builtin::get_true),
-            ("False", builtin::get_false),
-            ("And", builtin::get_and),
-            ("Or", builtin::get_or),
-            ("Not", builtin::get_not),
-            ("If", builtin::get_if),
-            ("Unit", || ValueRef::new(Value::Unit)),
-            ("PrintLn", builtin::get_println),
-            ("Print", builtin::get_print),
-            ("Is", builtin::get_is),
-            ("IsNot", builtin::get_is_not),
-            ("Add", builtin::get_add),
-            ("Sub", builtin::get_sub),
-            ("Mul", builtin::get_mul),
-            ("Div", builtin::get_div),
+            ("True", builtin::TRUE.clone()),
+            ("False", builtin::FALSE.clone()),
+            ("And", builtin::AND.clone()),
+            ("Or", builtin::OR.clone()),
+            ("Not", builtin::NOT.clone()),
+            ("If", builtin::IF.clone()),
+            ("Unit", builtin::UNIT.clone()),
+            ("PrintLn", builtin::PRINTLN.clone()),
+            ("Print", builtin::PRINT.clone()),
+            ("Is", builtin::IS.clone()),
+            ("IsNot", builtin::ISNOT.clone()),
+            ("Add", builtin::ADD.clone()),
+            ("Sub", builtin::SUB.clone()),
+            ("Mul", builtin::MUL.clone()),
+            ("Div", builtin::DIV.clone()),
         ]
     }
 
@@ -59,7 +59,7 @@ impl <'a> Compiler<'a> {
 
         for (_, provider) in self.extra_bindings.iter().rev() {
             let function = ExprRef::new(Expr::Fn(expr));
-            expr = ExprRef::new(Expr::Call(function, ExprRef::new(Expr::Value(provider()))));
+            expr = ExprRef::new(Expr::Call(function, ExprRef::new(Expr::Value(provider.clone()))));
         }
 
         self.match_consume(TokenType::Eof, Error::ExpectedEofAfterExpression).map_err(|e| (self.consume(), e))?;

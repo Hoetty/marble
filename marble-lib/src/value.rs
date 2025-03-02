@@ -1,16 +1,34 @@
-use std::{cell::RefCell, fmt::{Debug, Display}, rc::Rc};
+use std::{fmt::{Debug, Display}, sync::{Arc, RwLock}};
 
-use crate::{environment::EnvRef, error::Error, expr::ExprRef, interpreter::ValueResult, object_store::ObjectStore};
+use crate::{environment::EnvRef, error::Error, expr::ExprRef};
 
-pub type ValueRef = Rc<Value>;
+pub type ValueRef = Arc<Value>;
+
+#[derive(Debug, Clone)]
+pub enum BuiltIn {
+    Print,
+    PrintLn,
+    Is,
+    IsOf(ValueRef),
+    IsNot,
+    IsNotOf(ValueRef),
+    Add,
+    AddOf(f64),
+    Sub,
+    SubOf(f64),
+    Mul,
+    MulOf(f64),
+    Div,
+    DivOf(f64)
+}
 
 pub enum Value {
     Number(f64),
     String(String),
     Unit,
-    Lazy(ExprRef, EnvRef, RefCell<Option<ValueRef>>),
+    Lazy(ExprRef, EnvRef, Arc<RwLock<Option<ValueRef>>>),
     Fn(ExprRef, EnvRef),
-    Builtin(Box<dyn Fn(ValueRef, &ObjectStore) -> ValueResult>)
+    Builtin(BuiltIn)
 }
 
 impl Value {
@@ -47,7 +65,7 @@ impl Display for Value {
             Value::Unit => f.write_str("Unit"),
             Value::Lazy(_, _, _) => f.write_str("Lazy"),
             Value::Fn(_, _) => f.write_str("Function"),
-            Value::Builtin(_) => f.write_str("Builtin Function"),
+            Value::Builtin(b) => f.write_fmt(format_args!("Builtin {b:?}")),
         }
     }
 }

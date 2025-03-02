@@ -1,7 +1,7 @@
 use crate::{error::Error, evaluate_file_at, value::Value};
 
 pub fn file_name(name: &str) -> String {
-    format!("examples/test/{name}.mrbl")
+    format!("../examples/test/{name}.mrbl")
 }
 
 macro_rules! make_test {
