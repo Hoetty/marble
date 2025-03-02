@@ -1,9 +1,11 @@
-use std::{fs::read_to_string, path::PathBuf, str::FromStr};
+use std::{fs::read_to_string, io::{stdin, stdout, Cursor, Read, Write}, path::PathBuf, str::FromStr};
 
 use compiler::Compiler;
+use error::Error;
 use interpreter::{Interpreter, ValueResult};
 use scanner::Scanner;
 use source::Source;
+use value::ValueRef;
 
 pub mod scanner;
 pub mod source;
@@ -50,6 +52,16 @@ pub fn evaluate_file_at(file: &str) -> ValueResult {
 }
 
 pub fn evaluate_string(code: &str) -> ValueResult {
+    evaluate_code(code, stdin(), stdout())
+}
+
+pub fn execute_string(code: &str) -> Result<(ValueRef, String), Error> {
+    let mut output = Vec::new();
+    let cursor = Cursor::new(&mut output);
+    evaluate_code(code, stdin(), cursor).map(move |val| (val, String::from_utf8(output).unwrap()))
+}
+
+pub fn evaluate_code<I: Read, O: Write>(code: &str, input: I, output: O) -> ValueResult {
     let source = Source::new(&code);
     let scanner = Scanner::new(source);
 
@@ -57,6 +69,6 @@ pub fn evaluate_string(code: &str) -> ValueResult {
     compiler.with_bindings(Compiler::default_bindings());
     let (expr, _) = compiler.compile().map_err(|(_, e)| e)?;
 
-    let mut interpreter = Interpreter::new(expr);
+    let mut interpreter = Interpreter::new(expr, input, output);
     interpreter.interpret()
 }

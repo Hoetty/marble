@@ -1,3 +1,4 @@
+use std::io::{Read, Write};
 use std::sync::Arc;
 use crate::builtin;
 
@@ -5,12 +6,14 @@ use crate::{call, environment::{EnvRef, Environment}, error::Error, expr::{Expr,
 
 pub type ValueResult = Result<ValueRef, Error>;
 
-pub struct Interpreter {
+pub struct Interpreter<I: Read,O: Write> {
     environment: EnvRef,
     expr: ExprRef,
+    _input: I,
+    output: O,
 }
 
-impl Interpreter {
+impl <I: Read,O :Write> Interpreter<I,O> {
 
     pub fn interpret(&mut self) -> ValueResult {
         let value = self.evaluate(ExprRef::clone(&self.expr))?;
@@ -90,25 +93,25 @@ impl Interpreter {
         match function {
             BuiltIn::Print => {
                 match rhs.as_ref() {
-                    Value::Number(n) => print!("{n}"),
-                    Value::String(s) => print!("{s}"),
-                    Value::Unit => print!("Unit"),
+                    Value::Number(n) => write!(self.output, "{n}"),
+                    Value::String(s) => write!(self.output, "{s}"),
+                    Value::Unit => write!(self.output, "Unit"),
                     Value::Lazy(_, _, _) => panic!("Lazy passed to print"),
-                    Value::Fn(_, _) => print!("Function"),
-                    Value::Builtin(_) => print!("Builtin Function"),
-                };
+                    Value::Fn(_, _) => write!(self.output, "Function"),
+                    Value::Builtin(_) => write!(self.output, "Builtin Function"),
+                }.map_err(|_| Error::OutputNotWritable)?;
         
                 Ok(fun_val!(call!(identifier!(0), unit!())))
             },
             BuiltIn::PrintLn => {
                 match rhs.as_ref() {
-                    Value::Number(n) => println!("{n}"),
-                    Value::String(s) => println!("{s}"),
-                    Value::Unit => println!("Unit"),
+                    Value::Number(n) => writeln!(self.output, "{n}"),
+                    Value::String(s) => writeln!(self.output, "{s}"),
+                    Value::Unit => writeln!(self.output, "Unit"),
                     Value::Lazy(_, _, _) => panic!("Lazy passed to print"),
-                    Value::Fn(_, _) => println!("Function"),
-                    Value::Builtin(_) => println!("Builtin Function"),
-                };
+                    Value::Fn(_, _) => writeln!(self.output, "Function"),
+                    Value::Builtin(_) => writeln!(self.output, "Builtin Function"),
+                }.map_err(|_| Error::OutputNotWritable)?;
         
                 Ok(fun_val!(call!(identifier!(0), unit!())))
             },
@@ -154,10 +157,12 @@ impl Interpreter {
         }
     }
 
-    pub fn new(expr: ExprRef) -> Self {
+    pub fn new(expr: ExprRef, input: I, output: O) -> Self {
         Self { 
             environment: Environment::root(), 
             expr,
+            _input: input,
+            output
         }
     }
 }
