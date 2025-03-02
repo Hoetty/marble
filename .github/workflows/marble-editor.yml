@@ -22,14 +22,14 @@ jobs:
       with:
         path: ./marble-editor
 
-deploy:
-  environment:
-    name: github-pages
-    url: ${{ steps.deployment.outputs.page_url }}
-  needs: build
-  runs-on: ubuntu-latest
-  name: Deploy Editor
-  steps:
-    - name: Deploy Editor to GitHub Pages
-      id: deployment
-      uses: actions/deploy-pages@v4
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    needs: build
+    runs-on: ubuntu-latest
+    name: Deploy Editor
+    steps:
+      - name: Deploy Editor to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
