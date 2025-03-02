@@ -214,12 +214,17 @@ A VS Code Extension for syntax hightlighting is available under ```/marble-langu
 
 ## Running Marble Programs
 
-You can build the project using cargo and enter an interactive REPL using:
+The marble executable lives under ```imarble```. Nacvigate there first:
+```sh
+cd imarble
+```
+
+You can then build the project using cargo and enter an interactive REPL using:
 ```sh
 cargo run -r
 ```
 
-If you want to execute a file, you should pass the path to the file as argument:
+If you want to execute a file, you should pass the path to the file as an argument:
 ```sh
 cargo run -r -- path/to/my/file.mrbl
 ```
