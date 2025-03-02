@@ -3,6 +3,8 @@
 Marble is a compact and simple functional programming language.
 It is inspired by Lambda Calculus, Haskell and other functional programming languages and tries to do as much as possible with a minimal set of features.
 
+Try Marble at https://hoetty.github.io/marble/
+
 ## Syntax & Using Marble
 
 ### Literals
