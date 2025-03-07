@@ -18,5 +18,16 @@ let Fact be Y of Fact in
 
 Fact of Five
 comment 120
+`,
+
+"Arithmetic": `let 6 be Add of Three of Three in
+let 25 be Sub of ThirtyOne of 6 in
+let 100 be Mul of 25 of Four in
+Div of 100 of Ten
+
+comment 10
+`,
+
+"Hello World": `PrintLn of str Hello World ing then Unit
 `
 }

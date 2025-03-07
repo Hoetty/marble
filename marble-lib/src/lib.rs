@@ -61,6 +61,13 @@ pub fn execute_string(code: &str) -> Result<(ValueRef, String), Error> {
     evaluate_code(code, stdin(), cursor).map(move |val| (val, String::from_utf8(output).unwrap()))
 }
 
+pub fn execute_file_at(file: &str) -> Result<(ValueRef, String), Error> {
+    let mut output = Vec::new();
+    let cursor = Cursor::new(&mut output);
+    let code = read_to_string(file).unwrap();
+    evaluate_code(&code, stdin(), cursor).map(move |val| (val, String::from_utf8(output).unwrap()))
+}
+
 pub fn evaluate_code<I: Read, O: Write>(code: &str, input: I, output: O) -> ValueResult {
     let source = Source::new(&code);
     let scanner = Scanner::new(source);
