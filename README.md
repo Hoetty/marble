@@ -97,6 +97,22 @@ If you want to pass the result of a function call to a function, you can group i
 Add of Five of do Mul of Two of Two end
 ```
 
+#### Builtin Functions
+
+Marble offers several builtin functions for common tasks and arithmetic:
+- Add/2: Adds its numerical arguments
+- Sub/2: Subtracts its numerical arguments
+- Mul/2: Multiplies its numerical arguments
+- Div/2: Divides its numerical arguments
+- Is/2: Tests if its arguments are equal
+- IsNot/2: Tests if its arguments are not equal
+- Print/1: Prints the argument
+- PrintLn/1: Prints the argument and a newline
+- And/2: Returns the second argument if the first argument is true, the first otherwise
+- Or/2: Returns the first argument if the first argument is true, the second otherwise
+
+All builtin functions support partial application.
+
 ### Let
 
 Like in other procedural programming languages, you can put values into variables. To do that, you can use ```let X be Y in```, which assigns Y to X for the following expression:
