@@ -131,7 +131,7 @@ impl <'a> Scanner<'a> {
                     self.consume();
                 }
 
-                if self.is_at_end() || self.consume().is_ascii_whitespace() {
+                if self.is_at_end() || self.peek().is_ascii_whitespace() {
                     return true;
                 }
             }
