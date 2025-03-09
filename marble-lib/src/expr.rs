@@ -9,8 +9,6 @@ pub type ExprRef = Arc<Expr>;
 pub enum Expr {
     Identifier(IdentRef),
     Call(ExprRef, ExprRef),
-    String(String),
-    Number(f64),
     Value(ValueRef),
     Fn(ExprRef)
 }

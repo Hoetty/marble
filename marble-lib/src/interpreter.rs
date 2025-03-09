@@ -26,8 +26,6 @@ impl <I: Read,O :Write> Interpreter<I,O> {
                 Ok(Value::Lazy(expr, EnvRef::clone(&self.environment), Default::default()).new_ref())
             },
             Expr::Identifier(ident) => Ok(self.environment.find(*ident).clone()),
-            Expr::String(ref s) => Ok(Value::String(s.clone()).new_ref()),
-            Expr::Number(n) => Ok(Value::Number(*n).new_ref()),
             Expr::Value(v) => Ok(ValueRef::clone(v)),
             Expr::Fn(body) => Ok(Value::Fn(ExprRef::clone(body), EnvRef::clone(&self.environment)).new_ref()),
         }

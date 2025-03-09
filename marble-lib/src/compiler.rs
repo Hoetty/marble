@@ -1,6 +1,6 @@
 use std::iter::Peekable;
 
-use crate::{builtin, error::Error, expr::{Expr, ExprRef}, scanner::Scanner, source::{IdentifierTable, Source}, token::{Token, TokenType}, value::ValueRef};
+use crate::{builtin, error::Error, expr::{Expr, ExprRef}, scanner::Scanner, source::{IdentifierTable, Source}, token::{Token, TokenType}, value::{Value, ValueRef}};
 
 type ExprResult = Result<ExprRef, Error>;
 
@@ -50,7 +50,7 @@ impl <'a> Compiler<'a> {
         self
     }
 
-    pub fn compile(mut self) -> Result<(ExprRef, IdentifierTable<'a>), (Token, Error)> {
+    pub fn compile(mut self) -> Result<ExprRef, (Token, Error)> {
         for (ident, _) in &self.extra_bindings {
             self.identifiers.push(ident).map_err(|e| (Token { end: 0, start: 0, token_type: TokenType::Eof }, e))?;
         }
@@ -64,7 +64,7 @@ impl <'a> Compiler<'a> {
 
         self.match_consume(TokenType::Eof, Error::ExpectedEofAfterExpression).map_err(|e| (self.consume(), e))?;
 
-        Ok((expr, self.identifiers))
+        Ok(expr)
     }
 
     fn expression(&mut self) -> ExprResult {
@@ -135,10 +135,10 @@ impl <'a> Compiler<'a> {
                     _ => Ok(self.string_of(&lexeme[4..])),
                 }
             },
-            TokenType::Number(num) => Ok(ExprRef::new(Expr::Number(num))),
+            TokenType::Number(num) => Ok(Expr::Value(Value::Number(num).new_ref()).new_ref()),
             TokenType::Identifier => {
                 self.identifiers.distance_from_top(self.source.lexeme(&token)).map(|ident| {
-                    ExprRef::new(Expr::Identifier(ident))
+                    Expr::Identifier(ident).new_ref()
                 })
             },
             _ => Err(Error::ExpectedExpressionFound(token))
@@ -146,7 +146,7 @@ impl <'a> Compiler<'a> {
     }
 
     fn string_of(&mut self, string: &str) -> ExprRef {
-        ExprRef::new(Expr::String(string.to_string()))
+        Expr::Value(Value::String(string.to_string()).new_ref()).new_ref()
     }
 
     fn block(&mut self) -> ExprResult {

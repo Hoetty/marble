@@ -74,7 +74,7 @@ pub fn evaluate_code<I: Read, O: Write>(code: &str, input: I, output: O) -> Valu
 
     let mut compiler = Compiler::new(&source, scanner);
     compiler.with_bindings(Compiler::default_bindings());
-    let (expr, _) = compiler.compile().map_err(|(_, e)| e)?;
+    let expr = compiler.compile().map_err(|(_, e)| e)?;
 
     let mut interpreter = Interpreter::new(expr, input, output);
     interpreter.interpret()
