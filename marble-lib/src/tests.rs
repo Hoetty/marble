@@ -39,3 +39,7 @@ expect_error!(error_undefined, Error::IdentifierIsNotDefined(_));
 expect_output!(hello_world, "Hello World\n");
 
 expect_value!(arithmetic, Value::Number(10.0));
+
+expect_value!(simple_fib, Value::Number(377.0));
+
+expect_value!(tuple_fib, Value::Number(12586269025.0));

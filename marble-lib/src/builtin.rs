@@ -73,3 +73,23 @@ value!(
         )
     ))
 );
+
+value!(
+    TUPLE,
+    fun_val!(fun!(fun!(
+        call!(
+            call!(identifier!(0), identifier!(2)),
+            identifier!(1)
+        )
+    )))
+);
+
+value!(
+    TFIRST,
+    fun_val!(call!(identifier!(0), Expr::Value(TRUE.clone()).new_ref()))
+);
+
+value!(
+    TSECOND,
+    fun_val!(call!(identifier!(0), Expr::Value(FALSE.clone()).new_ref()))
+);

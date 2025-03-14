@@ -202,6 +202,43 @@ Fact of Five
 comment 120
 ```
 
+### Data Structures
+
+#### Tuples
+You can construct a tuple to hold exactly 2 items using the ```Tuple``` function:
+```
+Tuple of One of Two
+```
+
+The first value can be extracted from the tuple using the ```TFirst``` function, the second one using ```TSecond```:
+```
+let OneTwo be Tuple of One of Two in
+PrintLn of do TFirst of OneTwo end then
+PrintLn of do TSecond of OneTwo end then
+Unit
+```
+
+*Implementation Details:*
+The ```Tuple``` function constructs a function that accepts another function and calls that with the contained values:
+```
+fn L R Get do
+    Get of L of R
+end
+```
+
+To get the first element of the tuple, ```True``` is passed to it, as it returns the first of its two arguments; so ```TFirst``` is defined as:
+```
+fn T do
+    T of True
+end
+```
+Similarly, ```TSecond``` is defined using ```False```:
+```
+fn T do
+    T of False
+end
+```
+
 ### Pro Tips
 - You can also use let and curried functions, to create functions, where one argument is already defined: 
     ```
