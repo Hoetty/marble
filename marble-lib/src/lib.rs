@@ -69,7 +69,7 @@ pub fn execute_file_at(file: &str) -> Result<(ValueRef, String), Error> {
 }
 
 pub fn evaluate_code<I: Read, O: Write>(code: &str, input: I, output: O) -> ValueResult {
-    let source = Source::new(&code);
+    let source = Source::new(code);
     let scanner = Scanner::new(source);
 
     let mut compiler = Compiler::new(&source, scanner);

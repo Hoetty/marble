@@ -159,7 +159,7 @@ impl <'a> Compiler<'a> {
         let mut arguments = vec![self.try_identifier()?];
 
         while let Some(token) = self.matches(TokenType::Identifier) {
-            arguments.push(&self.source.lexeme(&token));
+            arguments.push(self.source.lexeme(&token));
         }
 
         for identifier in &arguments {

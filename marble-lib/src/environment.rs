@@ -15,6 +15,7 @@ pub enum Environment {
 
 impl Environment {
 
+    #[allow(clippy::declare_interior_mutable_const)]
     pub const ROOT: LazyLock<EnvRef> = LazyLock::new(|| EnvRef::new(Environment::Root));
 
     pub fn extend(environment: EnvRef, value: ValueRef) -> EnvRef {
@@ -29,6 +30,7 @@ impl Environment {
     }
 
     pub fn root() -> EnvRef {
+        #[allow(clippy::borrow_interior_mutable_const)]
         Self::ROOT.clone()
     }
 
