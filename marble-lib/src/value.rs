@@ -22,11 +22,30 @@ pub enum BuiltIn {
     DivOf(f64)
 }
 
+#[derive(Debug, Clone)]
+pub enum LazyVal {
+    Uncomputed(ExprRef, EnvRef),
+    Computed(ValueRef)
+}
+
+impl LazyVal {
+
+    pub fn uncomputed(expr: ExprRef, env: EnvRef) -> ValueRef {
+        Value::Lazy(Arc::new(RwLock::new(LazyVal::Uncomputed(expr, env)))).new_ref()
+    }
+
+    pub fn computed(value: ValueRef) -> ValueRef {
+        Value::Lazy(Arc::new(RwLock::new(LazyVal::Computed(value)))).new_ref()
+    }
+
+}
+
+#[derive(Debug)]
 pub enum Value {
     Number(f64),
     String(String),
     Unit,
-    Lazy(ExprRef, EnvRef, Arc<RwLock<Option<ValueRef>>>),
+    Lazy(Arc<RwLock<LazyVal>>),
     Fn(ExprRef, EnvRef),
     Builtin(BuiltIn)
 }
@@ -44,7 +63,7 @@ impl Value {
             Value::Number(_) => "Number",
             Value::String(_) => "String",
             Value::Unit => "Unit",
-            Value::Lazy(_, _, _) => "Lazy",
+            Value::Lazy(_) => "Lazy",
             Value::Fn(_, _) => "Function",
             Value::Builtin(_) => "Builtin",
         }
@@ -63,22 +82,9 @@ impl Display for Value {
             Value::Number(n) => f.write_fmt(format_args!("{n}")),
             Value::String(s) => f.write_fmt(format_args!("{s}")),
             Value::Unit => f.write_str("Unit"),
-            Value::Lazy(_, _, _) => f.write_str("Lazy"),
+            Value::Lazy(_) => f.write_str("Lazy"),
             Value::Fn(_, _) => f.write_str("Function"),
             Value::Builtin(b) => f.write_fmt(format_args!("Builtin {b:?}")),
-        }
-    }
-}
-
-impl Debug for Value {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::Number(arg0) => f.debug_tuple("Number").field(arg0).finish(),
-            Self::String(arg0) => f.debug_tuple("String").field(arg0).finish(),
-            Self::Unit => write!(f, "Unit"),
-            Self::Lazy(arg0, arg1, arg2) => f.debug_tuple("Lazy").field(arg0).field(arg1).field(arg2).finish(),
-            Self::Fn(arg0, arg1) => f.debug_tuple("Fn").field(arg0).field(arg1).finish(),
-            Self::Builtin(_) => f.debug_tuple("Builtin").field(&"Function").finish(),
         }
     }
 }
