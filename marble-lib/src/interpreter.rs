@@ -1,5 +1,6 @@
 use std::io::{Read, Write};
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
+
 use crate::builtin;
 
 use crate::value::LazyVal;
@@ -12,6 +13,14 @@ pub struct Interpreter<I: Read,O: Write> {
     expr: ExprRef,
     _input: I,
     output: O,
+}
+
+#[derive(Debug)]
+enum Instruction {
+    Unwrap,
+    Swap,
+    Call(Arc<RwLock<LazyVal>>, EnvRef),
+    Test
 }
 
 impl <I: Read,O :Write> Interpreter<I,O> {
@@ -41,51 +50,97 @@ impl <I: Read,O :Write> Interpreter<I,O> {
         return_value
     }
 
-    fn unwrap_lazy(&mut self, mut value: ValueRef) -> ValueResult {
-        while let Value::Lazy(lazy_val) = value.as_ref() {
-            let mut access = lazy_val.try_write()
-                .map_err(|_| Error::ValueDependsOnItself)?;
+    fn unwrap_lazy(&mut self, value: ValueRef) -> ValueResult {
 
-            let result = match &*access {
-                LazyVal::Computed(val) => {
-                    val.clone()
-                },
-                LazyVal::Uncomputed(expr, env) => {
-                    match expr.as_ref() {
-                        Expr::Call(lhs, rhs) => {
-                            let previous_env = EnvRef::clone(&self.environment);
-                            self.environment = EnvRef::clone(env);
-    
-                            let lhs = self.evaluate(ExprRef::clone(lhs))?;
-                            let rhs = self.evaluate(ExprRef::clone(rhs))?;
-    
-                            let lhs = self.unwrap_lazy(lhs)?;
-                            let result = match lhs.as_ref() {
-                                Value::Fn(expr, env) => self.evaluate_fn(ExprRef::clone(expr), EnvRef::clone(env), rhs),
-                                Value::Builtin(function) => {
-                                    let rhs = self.unwrap_lazy(rhs)?;
-                                    self.evaluate_builtin(function, rhs)
+        let mut stack = vec![value];
+        let mut instructions = vec![Instruction::Unwrap];
+
+        while let Some(instruction) = instructions.pop() {
+            match instruction {
+                Instruction::Unwrap => {
+                    let value = stack.pop().unwrap();
+                    let result = match value.as_ref() {
+                        Value::Lazy(rw_lock) => {
+                            let access = rw_lock.try_read()
+                                .map_err(|_| Error::ValueDependsOnItself)?;
+
+                            match &*access {
+                                LazyVal::Computed(val) => {
+                                    val.clone()
                                 },
-                                _ => { Err(Error::ValueNotCallable(lhs)) }
-                            }?;
-    
-                            self.environment = previous_env;
+                                LazyVal::Uncomputed(expr, env) => {
+                                    match expr.as_ref() {
+                                        Expr::Call(lhs, rhs) => {
+                                            let previous_env = EnvRef::clone(&self.environment);
+                                            self.environment = EnvRef::clone(env);
 
-                            *access = LazyVal::Computed(result.clone());
-    
-                            result
+                                            instructions.push(Instruction::Unwrap);
+                                            instructions.push(Instruction::Call(rw_lock.clone(), previous_env));
+                                            instructions.push(Instruction::Test);
+                    
+                                            let lhs = self.evaluate(ExprRef::clone(lhs))?;
+                                            let rhs = self.evaluate(ExprRef::clone(rhs))?;
+
+                                            stack.push(rhs);
+                                            
+                                            lhs
+                                        },
+                                        _ => {
+                                            self.evaluate(ExprRef::clone(expr))?
+                                        }
+                                    }
+                                },
+                            }
                         },
-                        _ => self.evaluate(ExprRef::clone(expr))?
+                        _ => value,
+                    };
+
+                    if matches!(result.as_ref(), Value::Lazy(_)) {
+                        instructions.push(Instruction::Unwrap);
                     }
+
+                    stack.push(result);
                 },
-            };
+                Instruction::Swap => {
+                    let len = stack.len();
+                    assert!(len >= 2);
+                    stack.swap(len - 1, len - 2);
+                },
+                Instruction::Test => {
+                    if !matches!(stack[stack.len() - 1].as_ref(), Value::Builtin(_)) {
+                        continue;
+                    }
 
-            drop(access);
+                    instructions.push(Instruction::Swap);
+                    instructions.push(Instruction::Unwrap);
+                    instructions.push(Instruction::Swap);
+                },
+                Instruction::Call(rw_lock, env) => {
+                    let mut access = rw_lock.try_write()
+                        .map_err(|_| Error::ValueDependsOnItself)?;
 
-            value = result;
+                    let lhs = stack.pop().unwrap();
+                    let result = match lhs.as_ref() {
+                        Value::Fn(expr, env) => self.evaluate_fn(expr.clone(), env.clone(), stack.pop().unwrap()),
+                        Value::Builtin(function) => {
+                            let rhs = stack.pop().unwrap();
+                            self.evaluate_builtin(&function, rhs)
+                        },
+                        _ => { Err(Error::ValueNotCallable(lhs)) }
+                    }?;
+
+                    *access = LazyVal::Computed(result.clone());
+
+                    self.environment = env;
+
+                    stack.push(result);
+                },
+            }
         }
 
-        Ok(value)
+        assert_eq!(stack.len(), 1);
+
+        Ok(stack.pop().unwrap())
     }
 
     fn evaluate_builtin(&mut self, function: &BuiltIn, rhs: ValueRef) -> ValueResult {

@@ -13,15 +13,12 @@
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=marble"
+                    "--package=marble-lib"
                 ],
-                "filter": {
-                    "name": "marble",
-                    "kind": "lib"
-                }
+                "cwd": "${workspaceFolder}/marble-lib"
             },
             "args": [],
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}/marble-lib"
         },
         {
             "type": "lldb",
@@ -30,16 +27,12 @@
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=imarble",
-                    "--package=marble"
+                    "--package=imarble"
                 ],
-                "filter": {
-                    "name": "imarble",
-                    "kind": "bin"
-                }
+                "cwd": "${workspaceFolder}/imarble"
             },
             "args": [],
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}/imarble"
         },
         {
             "type": "lldb",
@@ -48,18 +41,14 @@
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=imarble",
-                    "--package=marble"
+                    "--package=imarble"
                 ],
-                "filter": {
-                    "name": "imarble",
-                    "kind": "bin"
-                }
+                "cwd": "${workspaceFolder}/imarble"
             },
             "args": [
-                "examples/test.mrbl"
+                "${file}"
             ],
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}/imarble"
         },
         {
             "type": "lldb",
@@ -69,16 +58,12 @@
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=imarble",
-                    "--package=marble"
+                    "--package=imarble"
                 ],
-                "filter": {
-                    "name": "imarble",
-                    "kind": "bin"
-                }
+                "cwd": "${workspaceFolder}/imarble"
             },
             "args": [],
-            "cwd": "${workspaceFolder}"
+            "cwd": "${workspaceFolder}/imarble"
         },
         {
             "cwd": "${workspaceFolder}/marble-language-support",

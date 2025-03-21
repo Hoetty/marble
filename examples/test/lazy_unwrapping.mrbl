@@ -1,0 +1,7 @@
+comment Tests correct Lazy Unwrapping behavior by using the same lazy value twice
+
+let In be do
+    Print of str Once ing then
+    One
+end in
+Add of In of In
