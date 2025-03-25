@@ -1,6 +1,12 @@
 use std::fmt::{Debug, Display};
 
-use crate::{token::Token, value::ValueRef};
+use crate::{source::Source, token::Token, value::ValueRef};
+
+#[derive(Debug, Clone)]
+pub struct AnnotatedError {
+    pub error: Error,
+    pub token: Token
+}
 
 #[derive(Clone)]
 pub enum Error {
@@ -17,6 +23,27 @@ pub enum Error {
     ArgumentToOperatorMustBeANumber(&'static str),
     ValueDependsOnItself,
     OutputNotWritable,
+}
+
+impl AnnotatedError {
+
+    pub fn new(error: Error, token: Token) -> AnnotatedError {
+        AnnotatedError { error, token }
+    }
+
+    pub fn of_source(&self, source: &Source) -> String {
+        let line_col = source.start(&self.token);  
+        format!("Error at {}:{} => '{}'\n{}", line_col.line + 1, line_col.col + 1, source.lexeme(&self.token), self.error)
+    }
+
+}
+
+impl Error {
+
+    pub fn annotate(self, token: Token) -> AnnotatedError {
+        AnnotatedError::new(self, token)
+    }
+
 }
 
 impl Display for Error {

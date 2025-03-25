@@ -1,7 +1,7 @@
 use std::sync::LazyLock;
 
 use crate::environment::Environment;
-use crate::{call, expr::{Expr, ExprRef}, fun, fun_val, identifier, value::{Value, ValueRef}};
+use crate::{call, expr::Expr, fun, fun_val, identifier, value::{Value, ValueRef}};
 use crate::value::BuiltIn;
 
 macro_rules! value {
@@ -28,7 +28,7 @@ builtin!(DIV, Div);
 builtin!(IS, Is);
 builtin!(ISNOT, IsNot);
 
-value!(UNIT, ValueRef::new(Value::Unit));
+value!(UNIT, Value::Unit.new_ref());
 
 value!(TRUE, fun_val!(fun!(identifier!(1))));
 value!(FALSE, fun_val!(fun!(identifier!(0))));
@@ -86,10 +86,10 @@ value!(
 
 value!(
     TFIRST,
-    fun_val!(call!(identifier!(0), Expr::Value(TRUE.clone()).new_ref()))
+    fun_val!(call!(identifier!(0), Expr::Value(TRUE.clone()).default_ref()))
 );
 
 value!(
     TSECOND,
-    fun_val!(call!(identifier!(0), Expr::Value(FALSE.clone()).new_ref()))
+    fun_val!(call!(identifier!(0), Expr::Value(FALSE.clone()).default_ref()))
 );

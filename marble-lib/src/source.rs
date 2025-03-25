@@ -1,44 +1,25 @@
+use line_index::{LineCol, LineIndex};
+
 use crate::{error::Error, expr::IdentRef, token::Token};
 
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub struct Source<'a> {
     pub str: &'a str,
+    pub idx: LineIndex,
 }
 
 impl <'a> Source<'a> {
     #[inline]
     pub fn lexeme(&self, token: &Token) -> &'a str {
-        &self.str[token.start..token.end]
+        &self.str[token.range]
     }
 
-    #[inline]
-    pub fn line(&self, position: usize) -> usize {
-        self.str[..position].matches('\n').count() + 1
+    pub fn start(&self, token: &Token) -> LineCol {
+        self.idx.line_col(token.range.start())
     }
 
-    #[inline]
-    pub fn line_start(&self, token: &Token) -> usize {
-        self.line(token.start)
-    }
-
-    #[inline]
-    pub fn line_end(&self, token: &Token) -> usize {
-        self.line(token.end)
-    }
-
-    #[inline]
-    pub fn column(&self, position: usize) -> usize {
-        position - self.str[..position].rfind('\n').map_or(0, |v| v + 1) + 1
-    }
-
-    #[inline]
-    pub fn column_start(&self, token: &Token) -> usize {
-        self.column(token.start)
-    }
-
-    #[inline]
-    pub fn column_end(&self, token: &Token) -> usize {
-        self.column(token.end)
+    pub fn end(&self, token: &Token) -> LineCol {
+        self.idx.line_col(token.range.end())
     }
 
     #[inline]
@@ -54,7 +35,8 @@ impl <'a> Source<'a> {
     #[inline]
     pub fn new(source: &'a str) -> Self {
         Self {
-            str: source
+            str: source,
+            idx: LineIndex::new(source)
         }
     }
 }
@@ -68,10 +50,10 @@ type IdentifierResult = Result<usize, Error>;
 
 impl <'a> IdentifierTable<'a> {
 
-    pub fn push(&mut self, key: &'a str) -> IdentifierResult {
+    pub fn push(&mut self, key: &'a str) -> usize {
         let depth = self.identifiers.len();
         self.identifiers.push(key);
-        Ok(depth)
+        depth
     }
 
     pub fn distance_from_root(&self, key: &'a str) -> IdentifierResult {

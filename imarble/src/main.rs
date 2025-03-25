@@ -1,9 +1,9 @@
-use std::path::PathBuf;
+use std::{fs::read_to_string, path::PathBuf};
 
 mod repl;
 
 use clap::Parser;
-use marble::{evaluate_file, evaluate_string};
+use marble::{evaluate_file, evaluate_string, source::Source};
 use repl::input;
 
 /// Marble interpreter
@@ -29,7 +29,7 @@ fn repl() {
     for line in input() {
         match evaluate_string(&line) {
             Ok(value) => println!("{value}"),
-            Err(e) => println!("Error -> {e}"),
+            Err(e) => println!("{}", e.of_source(&Source::new(&line))),
         }
     }
 }
@@ -37,6 +37,6 @@ fn repl() {
 fn run_file(file: &PathBuf) {
     match evaluate_file(file) {
         Ok(value) => println!("{value}"),
-        Err(e) => println!("Error -> {e}"),
+        Err(e) => println!("{}", e.of_source(&Source::new(&read_to_string(file).unwrap()))),
     }
 }

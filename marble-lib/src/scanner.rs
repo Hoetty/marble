@@ -1,12 +1,14 @@
 use std::{iter::Peekable, str::Chars};
 
+use line_index::TextRange;
+
 use crate::{number::deserialize, source::Source, token::{Token, TokenType}};
 
 pub struct Scanner<'a> {
     start: usize,
     current: usize,
     chars: Peekable<Chars<'a>>,
-    source: Source<'a>
+    source: &'a Source<'a>
 }
 
 impl Iterator for Scanner<'_> {
@@ -104,8 +106,7 @@ impl <'a> Scanner<'a> {
 
     fn create_token(&self, token_type: TokenType) -> Token {
         Token {
-            start: self.start,
-            end: self.current,
+            range: TextRange::new((self.start as u32).into(), (self.current as u32).into()),
             token_type
         }
     }
@@ -150,7 +151,7 @@ impl <'a> Scanner<'a> {
         c
     }
 
-    pub fn new(source: Source<'a>) -> Self {
+    pub fn new(source: &'a Source<'a>) -> Self {
         Self {
             start: 0,
             current: 0,

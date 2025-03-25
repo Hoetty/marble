@@ -1,7 +1,7 @@
 use std::{fs::read_to_string, io::{stdin, stdout, Cursor, Read, Write}, path::PathBuf, str::FromStr};
 
 use compiler::Compiler;
-use error::Error;
+use error::AnnotatedError;
 use interpreter::{Interpreter, ValueResult};
 use scanner::Scanner;
 use source::Source;
@@ -42,6 +42,8 @@ pub mod tests;
 /// returns an Option, as it may fail. *```"Banana"``` isn't a number after all*.
 pub mod number;
 
+pub type OutputResult = Result<(ValueRef, String), AnnotatedError>;
+
 pub fn evaluate_file(file: &PathBuf) -> ValueResult {
     let file = read_to_string(file).unwrap();
     evaluate_string(&file)
@@ -55,13 +57,13 @@ pub fn evaluate_string(code: &str) -> ValueResult {
     evaluate_code(code, stdin(), stdout())
 }
 
-pub fn execute_string(code: &str) -> Result<(ValueRef, String), Error> {
+pub fn execute_string(code: &str) -> OutputResult {
     let mut output = Vec::new();
     let cursor = Cursor::new(&mut output);
     evaluate_code(code, stdin(), cursor).map(move |val| (val, String::from_utf8(output).unwrap()))
 }
 
-pub fn execute_file_at(file: &str) -> Result<(ValueRef, String), Error> {
+pub fn execute_file_at(file: &str) -> OutputResult {
     let mut output = Vec::new();
     let cursor = Cursor::new(&mut output);
     let code = read_to_string(file).unwrap();
@@ -70,11 +72,11 @@ pub fn execute_file_at(file: &str) -> Result<(ValueRef, String), Error> {
 
 pub fn evaluate_code<I: Read, O: Write>(code: &str, input: I, output: O) -> ValueResult {
     let source = Source::new(code);
-    let scanner = Scanner::new(source);
+    let scanner = Scanner::new(&source);
 
     let mut compiler = Compiler::new(&source, scanner);
     compiler.with_bindings(Compiler::default_bindings());
-    let expr = compiler.compile().map_err(|(_, e)| e)?;
+    let expr = compiler.compile()?;
 
     let mut interpreter = Interpreter::new(expr, input, output);
     interpreter.interpret()

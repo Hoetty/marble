@@ -1,34 +1,34 @@
 #[macro_export]
 macro_rules! fun {
     ($body: expr) => {
-        ExprRef::new(Expr::Fn($body))
+        Expr::Fn($body).default_ref()
     };
 }
 
 #[macro_export]
 macro_rules! fun_val {
     ($body: expr) => {
-        ValueRef::new(Value::Fn($body, Environment::root()))
+        Value::Fn($body, Environment::root()).new_ref()
     };
 }
 
 #[macro_export]
 macro_rules! identifier {
     ($ident: expr) => {
-        ExprRef::new(Expr::Identifier($ident))
+        Expr::Identifier($ident).default_ref()
     };
 }
 
 #[macro_export]
 macro_rules! call {
     ($lhs: expr, $rhs: expr) => {
-        ExprRef::new(Expr::Call($lhs, $rhs))
+        Expr::Call($lhs, $rhs).default_ref()
     };
 }
 
 #[macro_export]
 macro_rules! unit {
     () => {
-        ExprRef::new(Expr::Value(builtin::UNIT.clone()))
+        Expr::Value(builtin::UNIT.clone()).default_ref()
     };
 }

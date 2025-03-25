@@ -1,11 +1,12 @@
-#[derive(Debug, Clone, Copy, PartialEq)]
+use line_index::TextRange;
+
+#[derive(Debug, Clone, Copy, PartialEq, Default)]
 pub struct Token {
     pub token_type: TokenType,
-    pub start: usize,
-    pub end: usize
+    pub range: TextRange
 }
 
-#[derive(PartialEq, Clone, Copy, Debug)]
+#[derive(PartialEq, Clone, Copy, Debug, Default)]
 pub enum TokenType {
     String(bool), Number(f64), Identifier,
 
@@ -15,5 +16,8 @@ pub enum TokenType {
 
     Then,
 
-    Comment, Eof
+    Comment, Eof,
+
+    #[default]
+    Generated
 }
