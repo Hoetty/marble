@@ -1,3 +1,23 @@
+//! Scans a marble source file or string into a stream of tokens.
+//!
+//! The marble grammar consists of words seperated by whitespace.
+//! A word consists of any character that is not whitespace.
+//! Whitespace only counts ascii whitespace.
+//!
+//! The following is a single valid word:
+//! ++0dpp,+*äö)°
+//!
+//! Words are parsed as different tokens, depending on their content:
+//! - 'string' -> An empty string
+//! - 'str' -> Starts a string, that ends when encountering the word 'ing'
+//! - 'comment' -> Starts a single line comment, ending at the next newline
+//! - 'com' -> Starts a multi line comment, endig at the word 'ment'
+//! - 'fn', 'of', 'do', 'end', 'let', 'be' and 'in' -> Keywords
+//! - Any numeric words, like 'One', 'FortyTwo' or 'ThreePointOne' -> Number literals
+//! - Every other word -> An identifier
+//!
+//! UTF-8 is fully supported in strings, comments and identifiers.
+
 use std::{iter::Peekable, str::Chars};
 
 use line_index::TextRange;
@@ -24,31 +44,31 @@ impl Iterator for Scanner<'_> {
 }
 
 impl<'a> Scanner<'a> {
-    fn skip_whitespace(&mut self) {
-        while !self.is_at_end() && self.is_next_whitespace() {
-            self.consume();
+    pub fn new(source: &'a Source<'a>) -> Self {
+        Self {
+            start: 0,
+            current: 0,
+            source,
+            chars: source.str.chars().peekable(),
         }
     }
 
+    /// Consumes the next word.
+    /// A word consists of any characters, that are not ascii whitespace.
     fn next_word(&mut self) -> &str {
-        self.skip_whitespace();
-        self.start = self.current;
-
-        while !self.is_at_end() && !self.is_next_whitespace() {
-            self.consume();
-        }
-
+        self.consume_non_whitespace();
         &self.source.str[self.start..self.current]
     }
 
     fn next_token(&mut self) -> Token {
+        self.skip_whitespace();
+        self.start = self.current;
+
         if self.is_at_end() {
-            self.start = self.current;
             return self.create_token(TokenType::Eof);
         }
 
         match self.next_word() {
-            "" => self.create_token(TokenType::Eof),
             "string" => self.create_token(TokenType::String(true)),
             "str" => self.string(),
             "com" => {
@@ -70,19 +90,6 @@ impl<'a> Scanner<'a> {
                 }
             }
         }
-    }
-
-    fn comment(&mut self) -> Token {
-        while !self.is_at_end() && *self.peek() != '\n' {
-            self.consume();
-        }
-
-        self.create_token(TokenType::Comment)
-    }
-
-    fn multiline_comment(&mut self) -> Token {
-        self.consume_until("ment");
-        self.create_token(TokenType::Comment)
     }
 
     fn string(&mut self) -> Token {
@@ -108,10 +115,35 @@ impl<'a> Scanner<'a> {
         deserialize::parse_fraction(word)
     }
 
+    fn comment(&mut self) -> Token {
+        while !self.is_at_end() && *self.peek() != '\n' {
+            self.consume();
+        }
+
+        self.create_token(TokenType::Comment)
+    }
+
+    fn multiline_comment(&mut self) -> Token {
+        self.consume_until("ment");
+        self.create_token(TokenType::Comment)
+    }
+
     fn create_token(&self, token_type: TokenType) -> Token {
         Token {
             range: TextRange::new((self.start as u32).into(), (self.current as u32).into()),
             token_type,
+        }
+    }
+
+    fn skip_whitespace(&mut self) {
+        while !self.is_at_end() && self.is_next_whitespace() {
+            self.consume();
+        }
+    }
+
+    fn consume_non_whitespace(&mut self) {
+        while !self.is_at_end() && !self.is_next_whitespace() {
+            self.consume();
         }
     }
 
@@ -153,14 +185,5 @@ impl<'a> Scanner<'a> {
         let c = *self.peek();
         self.current += self.chars.next().unwrap().len_utf8();
         c
-    }
-
-    pub fn new(source: &'a Source<'a>) -> Self {
-        Self {
-            start: 0,
-            current: 0,
-            source,
-            chars: source.str.chars().peekable(),
-        }
     }
 }
