@@ -79,7 +79,7 @@ impl <'a> Compiler<'a> {
             return self.call();
         }
 
-        let variable_name = self.try_identifier()?;
+        let variable_name = self.try_identifier(Error::ExpectedIdentifierAsVariableName)?;
 
         let be_token = self.match_consume(TokenType::Be, Error::ExpectedBeInAssignment)?;
 
@@ -159,7 +159,7 @@ impl <'a> Compiler<'a> {
     }
 
     fn function(&mut self, fn_token: Token) -> ExprResult {
-        let mut arguments = vec![self.try_identifier()?];
+        let mut arguments = vec![self.try_identifier(Error::ExpectedIdentifierAsFunctionArgument)?];
 
         while let Some(token) = self.matches(TokenType::Identifier) {
             arguments.push(self.source.lexeme(&token));
@@ -183,8 +183,8 @@ impl <'a> Compiler<'a> {
         Ok(expr)
     }
 
-    fn try_identifier(&mut self) -> Result<&'a str, AnnotatedError> {
-        let identifier = self.match_consume(TokenType::Identifier, Error::ExpectedIdentifier)?;
+    fn try_identifier(&mut self, error: Error) -> Result<&'a str, AnnotatedError> {
+        let identifier = self.match_consume(TokenType::Identifier, error)?;
 
         Ok(self.source.lexeme(&identifier))
     }
