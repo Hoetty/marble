@@ -1,14 +1,17 @@
 use std::sync::LazyLock;
 
 use crate::environment::Environment;
-use crate::{call, expr::Expr, fun, fun_val, identifier, value::{Value, ValueRef}};
 use crate::value::BuiltIn;
+use crate::{
+    call,
+    expr::Expr,
+    fun, fun_val, identifier,
+    value::{Value, ValueRef},
+};
 
 macro_rules! value {
     ($name: ident, $expr: expr) => {
-        pub static $name: LazyLock<ValueRef> = LazyLock::new(|| {
-            $expr
-        });
+        pub static $name: LazyLock<ValueRef> = LazyLock::new(|| $expr);
     };
 }
 
@@ -33,63 +36,58 @@ value!(UNIT, Value::Unit.new_ref());
 value!(TRUE, fun_val!(fun!(identifier!(1))));
 value!(FALSE, fun_val!(fun!(identifier!(0))));
 
+value!(
+    NOT,
+    fun_val!(fun!(fun!(call!(
+        call!(identifier!(2), identifier!(0)),
+        identifier!(1)
+    ))))
+);
 
 value!(
-    NOT, 
-    fun_val!(fun!(fun!(
-        call!(
-            call!(identifier!(2), identifier!(0)), 
-            identifier!(1)
-        )
+    IF,
+    fun_val!(fun!(fun!(call!(
+        call!(identifier!(2), identifier!(1)),
+        identifier!(0)
+    ))))
+);
+
+value!(
+    OR,
+    fun_val!(fun!(call!(
+        call!(identifier!(1), identifier!(1)),
+        identifier!(0)
     )))
 );
 
 value!(
-    IF, 
-    fun_val!(fun!(fun!(
-        call!(
-            call!(identifier!(2), identifier!(1)), 
-            identifier!(0)
-        )
+    AND,
+    fun_val!(fun!(call!(
+        call!(identifier!(1), identifier!(0)),
+        identifier!(1)
     )))
-);
-
-value!(
-    OR, 
-    fun_val!(fun!(
-        call!(
-            call!(identifier!(1), identifier!(1)), 
-            identifier!(0)
-        )
-    ))
-);
-
-value!(
-    AND, 
-    fun_val!(fun!(
-        call!(
-            call!(identifier!(1), identifier!(0)), 
-            identifier!(1)
-        )
-    ))
 );
 
 value!(
     TUPLE,
-    fun_val!(fun!(fun!(
-        call!(
-            call!(identifier!(0), identifier!(2)),
-            identifier!(1)
-        )
-    )))
+    fun_val!(fun!(fun!(call!(
+        call!(identifier!(0), identifier!(2)),
+        identifier!(1)
+    ))))
 );
 
 value!(
     TFIRST,
-    fun_val!(call!(identifier!(0), Expr::Value(TRUE.clone()).default_ref()))
+    fun_val!(call!(
+        identifier!(0),
+        Expr::Value(TRUE.clone()).default_ref()
+    ))
 );
 
 value!(
     TSECOND,
-    fun_val!(call!(identifier!(0), Expr::Value(FALSE.clone()).default_ref()))
+    fun_val!(call!(
+        identifier!(0),
+        Expr::Value(FALSE.clone()).default_ref()
+    ))
 );

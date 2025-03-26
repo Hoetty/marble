@@ -8,7 +8,7 @@ pub struct Source<'a> {
     pub idx: LineIndex,
 }
 
-impl <'a> Source<'a> {
+impl<'a> Source<'a> {
     #[inline]
     pub fn lexeme(&self, token: &Token) -> &'a str {
         &self.str[token.range]
@@ -36,20 +36,19 @@ impl <'a> Source<'a> {
     pub fn new(source: &'a str) -> Self {
         Self {
             str: source,
-            idx: LineIndex::new(source)
+            idx: LineIndex::new(source),
         }
     }
 }
 
 #[derive(Clone, Debug, Default)]
 pub struct IdentifierTable<'a> {
-    identifiers: Vec<&'a str>
+    identifiers: Vec<&'a str>,
 }
 
 type IdentifierResult = Result<usize, Error>;
 
-impl <'a> IdentifierTable<'a> {
-
+impl<'a> IdentifierTable<'a> {
     pub fn push(&mut self, key: &'a str) -> usize {
         let depth = self.identifiers.len();
         self.identifiers.push(key);
@@ -57,7 +56,8 @@ impl <'a> IdentifierTable<'a> {
     }
 
     pub fn distance_from_root(&self, key: &'a str) -> IdentifierResult {
-        self.identifiers.iter()
+        self.identifiers
+            .iter()
             .rev()
             .position(|ident| *ident == key)
             .ok_or_else(|| Error::IdentifierIsNotDefined(key.to_string()))
@@ -65,7 +65,8 @@ impl <'a> IdentifierTable<'a> {
     }
 
     pub fn distance_from_top(&self, key: &'a str) -> IdentifierResult {
-        self.distance_from_root(key).map(|distance| self.identifiers.len() - 1 - distance)
+        self.distance_from_root(key)
+            .map(|distance| self.identifiers.len() - 1 - distance)
     }
 
     pub fn pop(&mut self) {

@@ -1,7 +1,7 @@
 const LARGEST: u64 = 1_000_000_000_000_000_000;
 
 /// Generates the name for a factor
-/// 
+///
 /// A factor is anything like Thousand, Million, etc.
 fn factor_name(number: u64) -> &'static str {
     match number {
@@ -17,11 +17,11 @@ fn factor_name(number: u64) -> &'static str {
 }
 
 /// Adds a triplet of digits to the string
-/// 
+///
 /// A triplet is anywhere in the range of 0..1000
 fn append_triplet_to_name(word: &mut String, mut triplet: u64) {
     if triplet >= 100 {
-        // If the triplet is larger than 100, 
+        // If the triplet is larger than 100,
         // the first digit needs to be added, followed by ```"Hundred"```
         append_triplet_to_name(word, triplet / 100);
         word.push_str("Hundred");
@@ -66,12 +66,12 @@ fn append_triplet_to_name(word: &mut String, mut triplet: u64) {
         70..80 => "Seventy",
         80..90 => "Eighty",
         90..100 => "Ninety",
-        _ => ""
+        _ => "",
     });
 
     // If the second digit added a syllable, that is still missing the third syllable,
     // and the third syllable is not zero, then we add it through this function.
-    // We dont add zeros, because 20 != TwentyZero and its only done for numbers above 
+    // We dont add zeros, because 20 != TwentyZero and its only done for numbers above
     // 20, because 18 != EighteenEight
     if matches!(triplet, 21..100) && triplet % 10 != 0 {
         append_triplet_to_name(word, triplet % 10);
@@ -79,10 +79,10 @@ fn append_triplet_to_name(word: &mut String, mut triplet: u64) {
 }
 
 /// Converts a whole number to its written form
-/// 
+///
 /// The number is formatted in ```PascalCase```, meaning each part starts with an uppercase letter.
-/// 
-/// ```rust 
+///
+/// ```rust
 /// use marble::number::serialize;
 /// assert_eq!(serialize::display_number(42), "FortyTwo");
 /// ```
@@ -113,11 +113,11 @@ pub fn display_number(mut number: u64) -> String {
 }
 
 /// Converts a decimal number to its written form
-/// 
+///
 /// The number is formatted in ```PascalCase```, meaning each part starts with an uppercase letter.
 /// The decimal seperator is the word ```"Point"```
-/// 
-/// ```rust 
+///
+/// ```rust
 /// use marble::number::serialize;
 /// assert_eq!(serialize::display_fraction(3.14), "ThreePointOneFour");
 /// ```

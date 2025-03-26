@@ -2,13 +2,17 @@ use std::{iter::Peekable, str::Chars};
 
 use line_index::TextRange;
 
-use crate::{number::deserialize, source::Source, token::{Token, TokenType}};
+use crate::{
+    number::deserialize,
+    source::Source,
+    token::{Token, TokenType},
+};
 
 pub struct Scanner<'a> {
     start: usize,
     current: usize,
     chars: Peekable<Chars<'a>>,
-    source: &'a Source<'a>
+    source: &'a Source<'a>,
 }
 
 impl Iterator for Scanner<'_> {
@@ -19,8 +23,7 @@ impl Iterator for Scanner<'_> {
     }
 }
 
-impl <'a> Scanner<'a> {
-
+impl<'a> Scanner<'a> {
     fn skip_whitespace(&mut self) {
         while !self.is_at_end() && self.is_next_whitespace() {
             self.consume();
@@ -52,12 +55,12 @@ impl <'a> Scanner<'a> {
                 // The comment is consumed but not returned
                 self.multiline_comment();
                 self.next_token()
-            },
+            }
             "comment" => {
                 self.comment();
                 self.next_token()
-            },
-            word => 
+            }
+            word => {
                 if let Some(keyword_type) = Self::check_keyword(word) {
                     self.create_token(keyword_type)
                 } else if let Some(number) = Self::check_number(word) {
@@ -65,6 +68,7 @@ impl <'a> Scanner<'a> {
                 } else {
                     self.create_token(TokenType::Identifier)
                 }
+            }
         }
     }
 
@@ -107,7 +111,7 @@ impl <'a> Scanner<'a> {
     fn create_token(&self, token_type: TokenType) -> Token {
         Token {
             range: TextRange::new((self.start as u32).into(), (self.current as u32).into()),
-            token_type
+            token_type,
         }
     }
 
@@ -156,7 +160,7 @@ impl <'a> Scanner<'a> {
             start: 0,
             current: 0,
             source,
-            chars: source.str.chars().peekable()
+            chars: source.str.chars().peekable(),
         }
     }
 }

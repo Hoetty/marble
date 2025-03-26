@@ -6,20 +6,19 @@ pub type EnvRef = Arc<Environment>;
 
 #[derive(Clone, Debug)]
 pub enum Environment {
-    Value {
-        value: ValueRef,
-        parent: EnvRef,
-    },
-    Root
+    Value { value: ValueRef, parent: EnvRef },
+    Root,
 }
 
 impl Environment {
-
     #[allow(clippy::declare_interior_mutable_const)]
     pub const ROOT: LazyLock<EnvRef> = LazyLock::new(|| EnvRef::new(Environment::Root));
 
     pub fn extend(environment: EnvRef, value: ValueRef) -> EnvRef {
-        EnvRef::new(Environment::Value { value, parent: EnvRef::clone(&environment) })
+        EnvRef::new(Environment::Value {
+            value,
+            parent: EnvRef::clone(&environment),
+        })
     }
 
     pub fn pop(environment: &EnvRef) -> EnvRef {
@@ -37,10 +36,12 @@ impl Environment {
     pub fn find(&self, depth: usize) -> ValueRef {
         match self {
             Self::Root => panic!("Tried to get on environment root"),
-            Self::Value { value, parent } => if depth == 0 {
-                ValueRef::clone(value)
-            } else {
-                parent.find(depth - 1)
+            Self::Value { value, parent } => {
+                if depth == 0 {
+                    ValueRef::clone(value)
+                } else {
+                    parent.find(depth - 1)
+                }
             }
         }
     }

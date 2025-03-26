@@ -15,19 +15,42 @@ macro_rules! make_test {
 
 macro_rules! expect_value {
     ($name: ident, $pattern: pat) => {
-        make_test!($name, assert!(matches!(evaluate_file_at(&file_name(stringify!($name))).unwrap().as_ref(), $pattern)));
+        make_test!(
+            $name,
+            assert!(matches!(
+                evaluate_file_at(&file_name(stringify!($name)))
+                    .unwrap()
+                    .as_ref(),
+                $pattern
+            ))
+        );
     };
 }
 
 macro_rules! expect_error {
     ($name: ident, $pattern: pat) => {
-        make_test!($name, assert!(matches!(evaluate_file_at(&file_name(stringify!($name))).err().unwrap().error, $pattern)));
+        make_test!(
+            $name,
+            assert!(matches!(
+                evaluate_file_at(&file_name(stringify!($name)))
+                    .err()
+                    .unwrap()
+                    .error,
+                $pattern
+            ))
+        );
     };
 }
 
 macro_rules! expect_output {
     ($name: ident, $pattern: literal) => {
-        make_test!($name, assert_eq!(execute_file_at(&file_name(stringify!($name))).unwrap().1, $pattern.to_string()));
+        make_test!(
+            $name,
+            assert_eq!(
+                execute_file_at(&file_name(stringify!($name))).unwrap().1,
+                $pattern.to_string()
+            )
+        );
     };
 }
 

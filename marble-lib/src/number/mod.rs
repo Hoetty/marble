@@ -1,5 +1,5 @@
-pub mod serialize;
 pub mod deserialize;
+pub mod serialize;
 
 #[cfg(test)]
 mod test {
@@ -9,7 +9,11 @@ mod test {
     pub fn convert_u64() {
         let mut i = 0;
         while i <= 100_000 {
-            assert_eq!(i, deserialize::parse_number(&serialize::display_number(i)).expect(&format!("{i} didnt convert")));
+            assert_eq!(
+                i,
+                deserialize::parse_number(&serialize::display_number(i))
+                    .expect(&format!("{i} didnt convert"))
+            );
             i += 1;
         }
     }
@@ -18,7 +22,11 @@ mod test {
     pub fn convert_f64() {
         let mut i = 0.0;
         while i <= 150_000.0 {
-            assert_eq!(i, deserialize::parse_fraction(&serialize::display_fraction(i)).expect(&format!("{i} didnt convert")));
+            assert_eq!(
+                i,
+                deserialize::parse_fraction(&serialize::display_fraction(i))
+                    .expect(&format!("{i} didnt convert"))
+            );
             i += 1.5;
         }
     }
@@ -36,5 +44,4 @@ mod test {
         assert!(deserialize::parse_fraction("OnePointOneTen").is_none());
         assert!(deserialize::parse_fraction("OnePointOneMillion").is_none());
     }
-
 }

@@ -1,6 +1,14 @@
 use std::iter::Peekable;
 
-use crate::{builtin, error::{AnnotatedError, Error}, expr::{Expr, ExprRef}, scanner::Scanner, source::{IdentifierTable, Source}, token::{Token, TokenType}, value::{Value, ValueRef}};
+use crate::{
+    builtin,
+    error::{AnnotatedError, Error},
+    expr::{Expr, ExprRef},
+    scanner::Scanner,
+    source::{IdentifierTable, Source},
+    token::{Token, TokenType},
+    value::{Value, ValueRef},
+};
 
 type ExprResult = Result<ExprRef, AnnotatedError>;
 
@@ -10,11 +18,10 @@ pub struct Compiler<'a> {
     source: &'a Source<'a>,
     scanner: Peekable<Scanner<'a>>,
     identifiers: IdentifierTable<'a>,
-    extra_bindings: Vec<Binding<'a>>
+    extra_bindings: Vec<Binding<'a>>,
 }
 
-impl <'a> Compiler<'a> {
-
+impl<'a> Compiler<'a> {
     pub fn default_bindings() -> Vec<Binding<'static>> {
         vec![
             ("True", builtin::TRUE.clone()),
@@ -43,7 +50,7 @@ impl <'a> Compiler<'a> {
             source,
             scanner: scanner.peekable(),
             identifiers: IdentifierTable::new(),
-            extra_bindings: Vec::new()
+            extra_bindings: Vec::new(),
         }
     }
 
@@ -95,7 +102,7 @@ impl <'a> Compiler<'a> {
         self.identifiers.pop();
 
         let function = Expr::Fn(body).annotate(in_token);
-        
+
         Ok(Expr::Call(function, value).annotate(be_token))
     }
 
@@ -137,14 +144,14 @@ impl <'a> Compiler<'a> {
                     _ if is_terminated => Ok(self.string_of(&lexeme[4..lexeme.len() - 4], token)),
                     _ => Ok(self.string_of(&lexeme[4..], token)),
                 }
-            },
+            }
             TokenType::Number(num) => Ok(Expr::Value(Value::Number(num).new_ref()).annotate(token)),
-            TokenType::Identifier => {
-                self.identifiers.distance_from_top(self.source.lexeme(&token)).map(|ident| {
-                    Expr::Identifier(ident).annotate(token)
-                }).map_err(|e| e.annotate(token))
-            },
-            _ => Err(Error::ExpectedExpressionFound(token).annotate(token))
+            TokenType::Identifier => self
+                .identifiers
+                .distance_from_top(self.source.lexeme(&token))
+                .map(|ident| Expr::Identifier(ident).annotate(token))
+                .map_err(|e| e.annotate(token)),
+            _ => Err(Error::ExpectedExpressionFound(token).annotate(token)),
         }
     }
 
@@ -199,7 +206,7 @@ impl <'a> Compiler<'a> {
 
     fn matches(&mut self, token: TokenType) -> Option<Token> {
         if self.peek().token_type == token {
-            Some(self.consume())    
+            Some(self.consume())
         } else {
             None
         }

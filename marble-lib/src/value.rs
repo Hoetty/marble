@@ -1,4 +1,7 @@
-use std::{fmt::{Debug, Display}, sync::{Arc, RwLock}};
+use std::{
+    fmt::{Debug, Display},
+    sync::{Arc, RwLock},
+};
 
 use crate::{environment::EnvRef, error::Error, expr::ExprRef};
 
@@ -19,17 +22,16 @@ pub enum BuiltIn {
     Mul,
     MulOf(f64),
     Div,
-    DivOf(f64)
+    DivOf(f64),
 }
 
 #[derive(Debug, Clone)]
 pub enum LazyVal {
     Uncomputed(ExprRef, EnvRef),
-    Computed(ValueRef)
+    Computed(ValueRef),
 }
 
 impl LazyVal {
-
     pub fn uncomputed(expr: ExprRef, env: EnvRef) -> ValueRef {
         Value::Lazy(Arc::new(RwLock::new(LazyVal::Uncomputed(expr, env)))).new_ref()
     }
@@ -37,7 +39,6 @@ impl LazyVal {
     pub fn computed(value: ValueRef) -> ValueRef {
         Value::Lazy(Arc::new(RwLock::new(LazyVal::Computed(value)))).new_ref()
     }
-
 }
 
 #[derive(Debug)]
@@ -47,14 +48,14 @@ pub enum Value {
     Unit,
     Lazy(Arc<RwLock<LazyVal>>),
     Fn(ExprRef, EnvRef),
-    Builtin(BuiltIn)
+    Builtin(BuiltIn),
 }
 
 impl Value {
     pub fn number_for_operator(&self, operator: &'static str) -> Result<f64, Error> {
         match self {
             Value::Number(f) => Ok(*f),
-            _ => Err(Error::ArgumentToOperatorMustBeANumber(operator))
+            _ => Err(Error::ArgumentToOperatorMustBeANumber(operator)),
         }
     }
 
@@ -73,7 +74,6 @@ impl Value {
     pub fn new_ref(self) -> ValueRef {
         ValueRef::new(self)
     }
-
 }
 
 impl Display for Value {

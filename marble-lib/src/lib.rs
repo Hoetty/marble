@@ -1,4 +1,9 @@
-use std::{fs::read_to_string, io::{stdin, stdout, Cursor, Read, Write}, path::PathBuf, str::FromStr};
+use std::{
+    fs::read_to_string,
+    io::{Cursor, Read, Write, stdin, stdout},
+    path::PathBuf,
+    str::FromStr,
+};
 
 use compiler::Compiler;
 use error::AnnotatedError;
@@ -7,17 +12,17 @@ use scanner::Scanner;
 use source::Source;
 use value::ValueRef;
 
+pub mod builtin;
+pub mod compiler;
+pub mod environment;
+pub mod error;
+pub mod expr;
+pub mod interpreter;
+pub mod meta;
 pub mod scanner;
 pub mod source;
 pub mod token;
-pub mod compiler;
-pub mod expr;
-pub mod error;
-pub mod interpreter;
-pub mod environment;
 pub mod value;
-pub mod builtin;
-pub mod meta;
 
 #[cfg(test)]
 pub mod tests;
@@ -25,19 +30,19 @@ pub mod tests;
 /// A crate to handle numbers and their written forms
 ///  
 /// Provides utility to convert numbers to words
-/// ```rust 
+/// ```rust
 /// use marble::number::serialize;
 /// assert_eq!(serialize::display_number(123), "OneHundredTwentyThree");
 /// ```
-/// 
+///
 /// And utility to parse such strings to numbers
-/// 
+///
 /// ```rust
 /// use marble::number::deserialize;
 /// assert_eq!(deserialize::parse_number("OneHundredTwentyThree"), Some(123));
 /// ```
-/// 
-/// Please note, that serialization will always return a string directly, 
+///
+/// Please note, that serialization will always return a string directly,
 /// because all numbers can be converted to a word. However in contrast, desirialization
 /// returns an Option, as it may fail. *```"Banana"``` isn't a number after all*.
 pub mod number;
