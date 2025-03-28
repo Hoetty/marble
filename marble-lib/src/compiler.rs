@@ -4,8 +4,9 @@ use crate::{
     builtin,
     error::{AnnotatedError, Error},
     expr::{Expr, ExprRef},
+    identifier::IdentifierTable,
     scanner::Scanner,
-    source::{IdentifierTable, Source},
+    source::Source,
     token::{Token, TokenType},
     value::{Value, ValueRef},
 };

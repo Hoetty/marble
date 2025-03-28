@@ -1,8 +1,7 @@
 use std::{ops::Deref, sync::Arc};
 
-use crate::{token::Token, value::ValueRef};
+use crate::{identifier::IdentRef, token::Token, value::ValueRef};
 
-pub type IdentRef = usize;
 pub type ExprRef = Arc<AnnotatedExpr>;
 
 #[derive(Debug, Clone)]

@@ -17,6 +17,7 @@ pub mod compiler;
 pub mod environment;
 pub mod error;
 pub mod expr;
+pub mod identifier;
 pub mod interpreter;
 pub mod meta;
 pub mod scanner;

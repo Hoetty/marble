@@ -12,7 +12,7 @@ mod test {
             assert_eq!(
                 i,
                 deserialize::parse_number(&serialize::display_number(i))
-                    .expect(&format!("{i} didnt convert"))
+                    .unwrap_or_else(|| panic!("{i} didnt convert"))
             );
             i += 1;
         }
@@ -25,7 +25,7 @@ mod test {
             assert_eq!(
                 i,
                 deserialize::parse_fraction(&serialize::display_fraction(i))
-                    .expect(&format!("{i} didnt convert"))
+                    .unwrap_or_else(|| panic!("{i} didnt convert"))
             );
             i += 1.5;
         }
