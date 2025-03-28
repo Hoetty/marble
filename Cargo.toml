@@ -7,6 +7,7 @@ edition = "2024"
 name = "marble"
 
 [workspace]
+members = ["marble-wasm", "imarble"]
 
 [dependencies]
 line-index = "0.1.2"

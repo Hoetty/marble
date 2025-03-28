@@ -14,11 +14,10 @@
                     "--no-run",
                     "--lib",
                     "--package=marble-lib"
-                ],
-                "cwd": "${workspaceFolder}/marble-lib"
+                ]
             },
             "args": [],
-            "cwd": "${workspaceFolder}/marble-lib"
+            "cwd": "${workspaceFolder}"
         },
         {
             "type": "lldb",
