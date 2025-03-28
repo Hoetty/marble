@@ -3,10 +3,10 @@ name: Rust
 on:
   push:
     branches: [ "main" ]
-    paths: [ "marble-lib/**", "marble-editor/**", "marble-wasm/**", ".github/workflows/**" ]
+    paths: [ "src/**", "marble-editor/**", "marble-wasm/**", ".github/workflows/**" ]
   pull_request:
     branches: [ "main" ]
-    paths: [ "marble-lib/**", "marble-editor/**", "marble-wasm/**", ".github/workflows/**" ]
+    paths: [ "src/**", "marble-editor/**", "marble-wasm/**", ".github/workflows/**" ]
 
 permissions:
   contents: read

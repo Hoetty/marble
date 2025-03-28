@@ -283,5 +283,5 @@ cargo run -r -- path/to/my/file.mrbl
 ```
 
 ## Planned Improvements
-- Error Messages: Currenly error messages are pretty minimal, and lack context such as line numbers or suggested fixes.
 - Performance: The current implementation is pretty slow.
+- Maybe maybe a language server
