@@ -202,15 +202,35 @@ Fact of Five
 comment 120
 ```
 
+### Imports
+
+You can use the builtin ```Import``` function, to import another script. The Import function will resolve to the value provided by the script. You should call the ```Import``` function using a string that is either ```lang/<..>``` to retrieve a language defined value or provide a path to another .mrbl script relative to the currents scripts location. When specifying the path, omit the ```.mrbl``` file extension.
+
+Consider the following directory structure:
+```
+- src
+  - file1.mrbl
+  - file2.mrbl
+  - folder1
+    - file3.mrbl
+```
+
+To import file2 from file1 you would specify ```file2```, to import file3 you would specify ```folder1/file3```.
+To import file2 from file3 you would specify ```../file2```.
+
+> **Note**
+>
+> Importing a file will fully evaluate it each time. This means two files, that both import each other directly will cause a recursion error.
+
 ### Data Structures
 
 #### Tuples
-You can construct a tuple to hold exactly 2 items using the ```Tuple``` function:
+You can construct a tuple to hold exactly 2 items using the ```Tuple``` function from ```lang/tuple```:
 ```
 Tuple of One of Two
 ```
 
-The first value can be extracted from the tuple using the ```TFirst``` function, the second one using ```TSecond```:
+The first value can be extracted from the tuple using the ```TFirst``` function from ```lang/tfirst```, the second one using ```TSecond``` from ```lang/tsecond```:
 ```
 let OneTwo be Tuple of One of Two in
 PrintLn of do TFirst of OneTwo end then

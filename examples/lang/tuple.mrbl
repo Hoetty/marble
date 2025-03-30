@@ -1,0 +1,3 @@
+fn L R Get do 
+    Get of L of R
+end

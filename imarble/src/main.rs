@@ -27,7 +27,7 @@ pub fn main() {
 
 fn repl() {
     for line in input() {
-        match evaluate_string(&line) {
+        match evaluate_string(&line, PathBuf::default()) {
             Ok(value) => println!("{value}"),
             Err(e) => println!("{}", e.of_source(&Source::new(&line))),
         }
@@ -37,6 +37,9 @@ fn repl() {
 fn run_file(file: &PathBuf) {
     match evaluate_file(file) {
         Ok(value) => println!("{value}"),
-        Err(e) => println!("{}", e.of_source(&Source::new(&read_to_string(file).unwrap()))),
+        Err(e) => println!(
+            "{}",
+            e.of_source(&Source::new(&read_to_string(file).unwrap()))
+        ),
     }
 }

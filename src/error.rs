@@ -21,6 +21,9 @@ pub enum Error {
     ValueNotCallable(ValueRef),
     IdentifierIsNotDefined(String),
     ArgumentToOperatorMustBeANumber(&'static str),
+    ArgumentToImportMustBeAString,
+    ImportCouldNotBeResolved(String),
+    ErrorInImportedFile(String, String),
     ValueDependsOnItself,
     OutputNotWritable,
 }
@@ -108,8 +111,17 @@ impl Display for Error {
             Self::ArgumentToOperatorMustBeANumber(str) => {
                 f.write_fmt(format_args!("Argument to {str} must be a number!"))
             }
-            Self::ValueDependsOnItself => f.write_str("Calculation of value depends on itself"),
-            Self::OutputNotWritable => f.write_str("Outputstream is not writable"),
+            Self::ValueDependsOnItself => f.write_str("Calculation of value depends on itself."),
+            Self::OutputNotWritable => f.write_str("Outputstream is not writable."),
+            Self::ArgumentToImportMustBeAString => {
+                f.write_str("Argument to 'Import' must be a string.")
+            }
+            Self::ImportCouldNotBeResolved(source) => {
+                f.write_fmt(format_args!("Import '{source}' could not be resolved."))
+            }
+            Self::ErrorInImportedFile(file, error) => {
+                f.write_fmt(format_args!("Error in imported file '{file}': \n{error}"))
+            }
         }
     }
 }

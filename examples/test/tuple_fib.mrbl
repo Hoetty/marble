@@ -1,11 +1,9 @@
 comment Calculates a fibonacci number using a sliding window. This completes in O(N) time
 
-let Y be fn F do
-    let G be fn X do 
-        F of do X of X end 
-    end in
-    G of G
-end in
+let Y be Import of str lang/y ing in
+let Tuple be Import of str lang/tuple ing in
+let TFirst be Import of str lang/tfirst ing in
+let TSecond be Import of str lang/tsecond ing in
 
 let Fib be fn Fib N do
     Is of N of Two of do

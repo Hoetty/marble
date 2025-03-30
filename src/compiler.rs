@@ -40,9 +40,7 @@ impl<'a> Compiler<'a> {
             ("Sub", builtin::SUB.clone()),
             ("Mul", builtin::MUL.clone()),
             ("Div", builtin::DIV.clone()),
-            ("Tuple", builtin::TUPLE.clone()),
-            ("TFirst", builtin::TFIRST.clone()),
-            ("TSecond", builtin::TSECOND.clone()),
+            ("Import", builtin::IMPORT.clone()),
         ]
     }
 

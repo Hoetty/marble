@@ -27,6 +27,7 @@ builtin!(ADD, Add);
 builtin!(SUB, Sub);
 builtin!(MUL, Mul);
 builtin!(DIV, Div);
+builtin!(IMPORT, Import);
 
 builtin!(IS, Is);
 builtin!(ISNOT, IsNot);
@@ -66,28 +67,4 @@ value!(
         call!(identifier!(1), identifier!(0)),
         identifier!(1)
     )))
-);
-
-value!(
-    TUPLE,
-    fun_val!(fun!(fun!(call!(
-        call!(identifier!(0), identifier!(2)),
-        identifier!(1)
-    ))))
-);
-
-value!(
-    TFIRST,
-    fun_val!(call!(
-        identifier!(0),
-        Expr::Value(TRUE.clone()).default_ref()
-    ))
-);
-
-value!(
-    TSECOND,
-    fun_val!(call!(
-        identifier!(0),
-        Expr::Value(FALSE.clone()).default_ref()
-    ))
 );

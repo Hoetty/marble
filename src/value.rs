@@ -23,6 +23,7 @@ pub enum BuiltIn {
     MulOf(f64),
     Div,
     DivOf(f64),
+    Import,
 }
 
 #[derive(Debug, Clone)]

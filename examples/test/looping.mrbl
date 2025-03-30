@@ -1,11 +1,6 @@
 comment Tests recursion by looping a lot
 
-let Y be fn F do
-    let G be fn X do 
-        F of do X of X end 
-    end in
-    G of G
-end in
+let Y be Import of str lang/y ing in
 
 let Finish be fn Finish N do
     Is of N of Zero of do

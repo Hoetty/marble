@@ -70,3 +70,5 @@ expect_value!(tuple_fib, Value::Number(12586269025.0));
 // expect_value!(looping, Value::Number(1.0));
 
 expect_output!(lazy_unwrapping, "Once");
+
+expect_value!(import, Value::Number(3.0));

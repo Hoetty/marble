@@ -12,3 +12,4 @@ members = ["marble-wasm", "imarble"]
 
 [dependencies]
 line-index = "0.1.2"
+rust-embed = "8.6.0"
