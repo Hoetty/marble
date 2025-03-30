@@ -202,6 +202,8 @@ Fact of Five
 comment 120
 ```
 
+You dont need to reimplement the combinators every time you use them though, you can import the Y and the Z combinator from ```lang/y``` and ```lang/z``` respectively.
+
 ### Imports
 
 You can use the builtin ```Import``` function, to import another script. The Import function will resolve to the value provided by the script. You should call the ```Import``` function using a string that is either ```lang/<..>``` to retrieve a language defined value or provide a path to another .mrbl script relative to the currents scripts location. When specifying the path, omit the ```.mrbl``` file extension.
