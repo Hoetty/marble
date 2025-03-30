@@ -1,10 +1,5 @@
 var examples = {
-    "Factorial": `let Y be fn F do
-    let G be fn X do 
-        F of do X of X end 
-    end in
-    G of G
-end in
+    "Factorial": `let Y be Import of str lang/y ing in
 
 let Fact be fn Fact N do
     Is of N of Zero of do
@@ -20,7 +15,7 @@ Fact of Five
 comment 120
 `,
 
-"Arithmetic": `let 6 be Add of Three of Three in
+    "Arithmetic": `let 6 be Add of Three of Three in
 let 25 be Sub of ThirtyOne of 6 in
 let 100 be Mul of 25 of Four in
 Div of 100 of Ten
@@ -28,14 +23,9 @@ Div of 100 of Ten
 comment 10
 `,
 
-"Hello World": `PrintLn of str Hello World ing then Unit
+    "Hello World": `PrintLn of str Hello World ing then Unit
 `,
-"Simple Fibonacci": `let Y be fn F do
-    let G be fn X do 
-        F of do X of X end 
-    end in
-    G of G
-end in
+    "Simple Fibonacci": `let Y be Import of str lang/y ing in
 
 let Fib be fn Fib N do
     Or of do Is of N of One end of do Is of N of Two end of do
@@ -51,12 +41,7 @@ Fib of Fourteen
 
 comment 377
 `,
-"Linear Fibonacci": `let Y be fn F do
-    let G be fn X do 
-        F of do X of X end 
-    end in
-    G of G
-end in
+    "Linear Fibonacci": `let Y be Import of str lang/y ing in
 
 let Fib be fn Fib N do
     Is of N of Two of do
