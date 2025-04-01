@@ -1,0 +1,15 @@
+[package]
+name = "marble-language-server"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+dashmap = "6.1.0"
+tokio = { version = "1.44.1", features = [
+    "io-std",
+    "macros",
+    "rt-multi-thread",
+] }
+tower-lsp = "0.20.0"
+marble = { path = ".." }
+line-index = "0.1.2"

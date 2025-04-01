@@ -64,6 +64,7 @@
             "cwd": "${workspaceFolder}/imarble"
         },
         {
+            "preLaunchTask": "npm: compile - marble-language-support",
             "cwd": "${workspaceFolder}/marble-language-support",
             "name": "Extension",
             "type": "extensionHost",

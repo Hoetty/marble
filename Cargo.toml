@@ -8,7 +8,7 @@ name = "marble"
 
 [workspace]
 resolver = "2"
-members = ["marble-wasm", "imarble"]
+members = ["marble-wasm", "imarble", "marble-language-server"]
 
 [dependencies]
 line-index = "0.1.2"
