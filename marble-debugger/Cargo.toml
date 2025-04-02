@@ -1,0 +1,8 @@
+[package]
+name = "marble-debugger"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+marble = { path = ".." }
+dap = { git = "https://github.com/sztomi/dap-rs.git" }
