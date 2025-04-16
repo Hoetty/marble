@@ -1,6 +1,6 @@
 use std::{
-    fmt::{Debug, Display},
-    sync::{Arc, RwLock},
+    fmt::Display,
+    sync::{Arc, OnceLock},
 };
 
 use crate::{environment::EnvRef, error::Error, expr::ExprRef};
@@ -26,28 +26,12 @@ pub enum BuiltIn {
     Import,
 }
 
-#[derive(Debug, Clone)]
-pub enum LazyVal {
-    Uncomputed(ExprRef, EnvRef),
-    Computed(ValueRef),
-}
-
-impl LazyVal {
-    pub fn uncomputed(expr: ExprRef, env: EnvRef) -> ValueRef {
-        Value::Lazy(Arc::new(RwLock::new(LazyVal::Uncomputed(expr, env)))).new_ref()
-    }
-
-    pub fn computed(value: ValueRef) -> ValueRef {
-        Value::Lazy(Arc::new(RwLock::new(LazyVal::Computed(value)))).new_ref()
-    }
-}
-
 #[derive(Debug)]
 pub enum Value {
     Number(f64),
     String(String),
     Unit,
-    Lazy(Arc<RwLock<LazyVal>>),
+    LazyCall(ExprRef, ExprRef, EnvRef, OnceLock<ValueRef>),
     Fn(ExprRef, EnvRef),
     Builtin(BuiltIn),
 }
@@ -65,7 +49,7 @@ impl Value {
             Value::Number(_) => "Number",
             Value::String(_) => "String",
             Value::Unit => "Unit",
-            Value::Lazy(_) => "Lazy",
+            Value::LazyCall(_, _, _, _) => "Lazy",
             Value::Fn(_, _) => "Function",
             Value::Builtin(_) => "Builtin",
         }
@@ -83,7 +67,7 @@ impl Display for Value {
             Value::Number(n) => f.write_fmt(format_args!("{n}")),
             Value::String(s) => f.write_fmt(format_args!("{s}")),
             Value::Unit => f.write_str("Unit"),
-            Value::Lazy(_) => f.write_str("Lazy"),
+            Value::LazyCall(_, _, _, _) => f.write_str("Lazy"),
             Value::Fn(_, _) => f.write_str("Function"),
             Value::Builtin(b) => f.write_fmt(format_args!("Builtin {b:?}")),
         }

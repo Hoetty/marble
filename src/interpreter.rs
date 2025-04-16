@@ -2,7 +2,7 @@ use std::fs;
 use std::io::{Read, Write};
 use std::ops::Deref;
 use std::path::PathBuf;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, OnceLock};
 
 use rust_embed::Embed;
 
@@ -10,8 +10,6 @@ use crate::source::Source;
 use crate::{builtin, evaluate_code};
 
 use crate::error::AnnotatedError;
-use crate::token::Token;
-use crate::value::LazyVal;
 use crate::{
     call,
     environment::{EnvRef, Environment},
@@ -33,91 +31,61 @@ struct Lang;
 
 pub struct Interpreter<'a> {
     execution_path: PathBuf,
-    environment: EnvRef,
-    expr: ExprRef,
     _input: Input<'a>,
     output: Output<'a>,
 }
 
 impl<'a> Interpreter<'a> {
-    pub fn interpret(&mut self) -> ValueResult {
-        let value = self.evaluate(ExprRef::clone(&self.expr))?;
+    pub fn interpret(&mut self, expr: ExprRef) -> ValueResult {
+        let value = self.evaluate(expr, Environment::root())?;
         self.unwrap_lazy(value)
     }
 
-    fn evaluate(&mut self, expr: ExprRef) -> ValueResult {
+    fn evaluate(&mut self, expr: ExprRef, environment: EnvRef) -> ValueResult {
         match expr.as_ref().deref() {
-            Expr::Call(_, _) => Ok(LazyVal::uncomputed(expr.clone(), self.environment.clone())),
-            Expr::Identifier(ident) => Ok(self.environment.find(*ident).clone()),
-            Expr::Value(v) => Ok(v.clone()),
-            Expr::Fn(body) => {
-                Ok(Value::Fn(body.clone(), EnvRef::clone(&self.environment)).new_ref())
+            Expr::Call(lhs, rhs) => {
+                Ok(
+                    Value::LazyCall(lhs.clone(), rhs.clone(), environment, OnceLock::new())
+                        .new_ref(),
+                )
             }
+            Expr::Identifier(ident) => Ok(environment.find(*ident).clone()),
+            Expr::Value(v) => Ok(v.clone()),
+            Expr::Fn(body) => Ok(Value::Fn(body.clone(), environment).new_ref()),
         }
     }
 
     fn evaluate_fn(&mut self, expr: ExprRef, environment: EnvRef, value: ValueRef) -> ValueResult {
-        let previous = EnvRef::clone(&self.environment);
-        self.environment = Environment::extend(environment, value);
-        let return_value = self.evaluate(expr);
-        self.environment = previous;
-
-        return_value
+        self.evaluate(expr, Environment::extend(environment, value))
     }
 
     fn unwrap_lazy(&mut self, value: ValueRef) -> ValueResult {
-        let rw_lock = match value.as_ref() {
-            Value::Lazy(rw_lock) => rw_lock,
-            _ => return Ok(value),
+        let Value::LazyCall(lhs_expr, rhs_expr, env, cell) = &*value else {
+            return Ok(value);
         };
 
-        let read = rw_lock
-            .try_read()
-            .map_err(|_| Error::ValueDependsOnItself.annotate(Token::default()))?;
+        if let Some(value) = cell.get() {
+            return Ok(value.clone());
+        }
 
-        let (expr, env) = match read.deref() {
-            LazyVal::Uncomputed(annotated_expr, environment) => (annotated_expr, environment),
-            LazyVal::Computed(value) => return Ok(value.clone()),
-        };
+        let lhs = self.evaluate(lhs_expr.clone(), env.clone())?;
+        let rhs = self.evaluate(rhs_expr.clone(), env.clone())?;
 
-        let previous_env = self.environment.clone();
-        self.environment = env.clone();
+        let lhs = self.unwrap_lazy(lhs)?;
 
-        let result = match expr.expr() {
-            Expr::Call(lhs_expr, rhs_expr) => {
-                let lhs = self.evaluate(lhs_expr.clone())?;
-                let rhs = self.evaluate(rhs_expr.clone())?;
-
-                let lhs = self.unwrap_lazy(lhs)?;
-
-                match &*lhs {
-                    Value::Fn(body, env) => self.evaluate_fn(body.clone(), env.clone(), rhs),
-                    Value::Builtin(built_in) => {
-                        let rhs = self.unwrap_lazy(rhs)?;
-                        self.evaluate_builtin(built_in, rhs)
-                            .map_err(|err| err.annotate(expr.token))
-                    }
-                    _ => Err(Error::ValueNotCallable(lhs).annotate(lhs_expr.token)),
-                }
+        let value = match &*lhs {
+            Value::Fn(body, env) => self.evaluate_fn(body.clone(), env.clone(), rhs),
+            Value::Builtin(built_in) => {
+                let rhs = self.unwrap_lazy(rhs)?;
+                self.evaluate_builtin(built_in, rhs)
+                    .map_err(|err| err.annotate(lhs_expr.token))
             }
-            _ => self.evaluate(expr.clone()),
+            _ => Err(Error::ValueNotCallable(lhs).annotate(lhs_expr.token)),
         }?;
 
-        let result = self.unwrap_lazy(result)?;
+        let value = self.unwrap_lazy(value)?;
 
-        self.environment = previous_env;
-
-        let expr_token = expr.token;
-
-        drop(read);
-
-        let mut write = rw_lock
-            .try_write()
-            .map_err(|_| Error::ValueDependsOnItself.annotate(expr_token))?;
-
-        *write = LazyVal::Computed(result.clone());
-
-        Ok(result)
+        Ok(cell.get_or_init(|| value).clone())
     }
 
     fn evaluate_builtin(&mut self, function: &BuiltIn, rhs: ValueRef) -> Result<ValueRef, Error> {
@@ -129,7 +97,7 @@ impl<'a> Interpreter<'a> {
                     Value::Number(n) => write!(output, "{n}"),
                     Value::String(s) => write!(output, "{s}"),
                     Value::Unit => write!(output, "Unit"),
-                    Value::Lazy(_) => panic!("Lazy passed to print"),
+                    Value::LazyCall(_, _, _, _) => panic!("Lazy passed to print"),
                     Value::Fn(_, _) => write!(output, "Function"),
                     Value::Builtin(_) => write!(output, "Builtin Function"),
                 }
@@ -144,7 +112,7 @@ impl<'a> Interpreter<'a> {
                     Value::Number(n) => writeln!(output, "{n}"),
                     Value::String(s) => writeln!(output, "{s}"),
                     Value::Unit => writeln!(output, "Unit"),
-                    Value::Lazy(_) => panic!("Lazy passed to print"),
+                    Value::LazyCall(_, _, _, _) => panic!("Lazy passed to print"),
                     Value::Fn(_, _) => writeln!(output, "Function"),
                     Value::Builtin(_) => writeln!(output, "Builtin Function"),
                 }
@@ -250,10 +218,8 @@ impl<'a> Interpreter<'a> {
         )
     }
 
-    pub fn new(expr: ExprRef, input: Input<'a>, output: Output<'a>, path: PathBuf) -> Self {
+    pub fn new(input: Input<'a>, output: Output<'a>, path: PathBuf) -> Self {
         Self {
-            environment: Environment::root(),
-            expr,
             _input: input,
             output,
             execution_path: path,

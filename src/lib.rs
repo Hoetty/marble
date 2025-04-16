@@ -89,6 +89,6 @@ pub fn evaluate_code<'a>(
     compiler.with_bindings(Compiler::default_bindings());
     let expr = compiler.compile()?;
 
-    let mut interpreter = Interpreter::new(expr, input, output, execution_path);
-    interpreter.interpret()
+    let mut interpreter = Interpreter::new(input, output, execution_path);
+    interpreter.interpret(expr)
 }
